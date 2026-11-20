@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import FileDropzone from "./FileDropzone";
 import DynamicIcon from "./DynamicIcon";
+import { formatBytes, sanitizeFilename, revokeUrl } from "@/lib/utils";
 import {
   mergePdf,
   splitPdf,
@@ -47,15 +48,22 @@ import {
   FileCheck,
   Sparkles,
   Lock,
+  Eye,
+  Sliders,
+  FileText,
 } from "lucide-react";
 
 export default function ToolView({ tool }) {
+  // State machine: 'empty' | 'ready' | 'processing' | 'completed' | 'error'
   const [files, setFiles] = useState([]);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
   const [copiedKey, setCopiedKey] = useState(null);
+
+  // Track created blob URLs for memory cleanup
+  const createdUrls = useRef([]);
 
   // Tool specific options state
   const [pdfRange, setPdfRange] = useState("1-3");
@@ -93,7 +101,21 @@ export default function ToolView({ tool }) {
   const [renameFind, setRenameFind] = useState("");
   const [renameReplace, setRenameReplace] = useState("");
 
-  const triggerDownload = (url, filename) => {
+  // Memory cleanup on unmount
+  useEffect(() => {
+    return () => {
+      createdUrls.current.forEach((url) => revokeUrl(url));
+      createdUrls.current = [];
+    };
+  }, []);
+
+  const registerUrl = (url) => {
+    if (url) createdUrls.current.push(url);
+    return url;
+  };
+
+  const triggerDownload = (url, rawFilename) => {
+    const filename = sanitizeFilename(rawFilename, "download");
     const a = document.createElement("a");
     a.href = url;
     a.download = filename;
@@ -109,6 +131,8 @@ export default function ToolView({ tool }) {
   };
 
   const handleReset = () => {
+    createdUrls.current.forEach((url) => revokeUrl(url));
+    createdUrls.current = [];
     setFiles([]);
     setResult(null);
     setError("");
@@ -137,36 +161,41 @@ export default function ToolView({ tool }) {
         }
         const bytes = await mergePdf(files, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "download",
           blob,
-          url: URL.createObjectURL(blob),
+          url,
           filename: "merged_document.pdf",
-          message: `Successfully merged ${files.length} PDF documents into one!`,
+          size: blob.size,
+          message: `Successfully merged ${files.length} PDF documents into one unified file.`,
         });
       } else if (slug === "split-pdf") {
         const splitRes = await splitPdf(files[0], splitMode, pdfRange, setProgress);
         if (Array.isArray(splitRes)) {
-          // Array of single pages: bundle into ZIP
           const zip = await createZip(
             splitRes.map((r) => new File([r.bytes], r.name, { type: "application/pdf" })),
             "split_pages.zip"
           );
+          const url = registerUrl(zip.url);
           setResult({
             type: "download",
             blob: zip.blob,
-            url: zip.url,
+            url,
             filename: zip.fileName,
-            message: `Extracted ${splitRes.length} individual pages into a ZIP archive!`,
+            size: zip.size,
+            message: `Extracted ${splitRes.length} individual pages into a ZIP archive.`,
           });
         } else {
           const blob = new Blob([splitRes], { type: "application/pdf" });
+          const url = registerUrl(URL.createObjectURL(blob));
           setResult({
             type: "download",
             blob,
-            url: URL.createObjectURL(blob),
+            url,
             filename: `split_${files[0].name}`,
-            message: `Successfully extracted page range (${pdfRange})!`,
+            size: blob.size,
+            message: `Extracted page range (${pdfRange}) successfully.`,
           });
         }
       } else if (slug === "rotate-pdf") {
@@ -178,42 +207,50 @@ export default function ToolView({ tool }) {
           setProgress
         );
         const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "download",
           blob,
-          url: URL.createObjectURL(blob),
+          url,
           filename: `rotated_${files[0].name}`,
-          message: `Rotated pages by ${rotationAngle}° successfully!`,
+          size: blob.size,
+          message: `Rotated pages by ${rotationAngle}° successfully.`,
         });
       } else if (slug === "delete-pdf-pages") {
         const bytes = await deletePdfPages(files[0], deletePagesInput, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "download",
           blob,
-          url: URL.createObjectURL(blob),
+          url,
           filename: `trimmed_${files[0].name}`,
-          message: `Removed pages (${deletePagesInput}) successfully!`,
+          size: blob.size,
+          message: `Removed pages (${deletePagesInput}) successfully.`,
         });
       } else if (slug === "extract-pdf-pages") {
         const bytes = await extractPdfPages(files[0], extractPagesInput, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "download",
           blob,
-          url: URL.createObjectURL(blob),
+          url,
           filename: `extracted_${files[0].name}`,
-          message: `Extracted pages (${extractPagesInput}) into new PDF!`,
+          size: blob.size,
+          message: `Extracted pages (${extractPagesInput}) into new PDF.`,
         });
       } else if (slug === "organize-pdf") {
         const bytes = await organizePdf(files[0], organizeOrderInput, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "download",
           blob,
-          url: URL.createObjectURL(blob),
+          url,
           filename: `reorganized_${files[0].name}`,
-          message: "Pages reorganized successfully!",
+          size: blob.size,
+          message: "Pages reorganized according to custom sequence.",
         });
       } else if (slug === "add-watermark") {
         const bytes = await addWatermark(
@@ -226,12 +263,14 @@ export default function ToolView({ tool }) {
           setProgress
         );
         const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "download",
           blob,
-          url: URL.createObjectURL(blob),
+          url,
           filename: `watermarked_${files[0].name}`,
-          message: `Watermark "${watermarkText}" stamped across all pages!`,
+          size: blob.size,
+          message: `Watermark "${watermarkText}" stamped on all pages.`,
         });
       } else if (slug === "add-page-numbers") {
         const bytes = await addPageNumbers(
@@ -243,72 +282,87 @@ export default function ToolView({ tool }) {
           setProgress
         );
         const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "download",
           blob,
-          url: URL.createObjectURL(blob),
+          url,
           filename: `numbered_${files[0].name}`,
-          message: "Page numbers inserted successfully!",
+          size: blob.size,
+          message: "Page numbers inserted into document margins.",
         });
       } else if (slug === "protect-pdf") {
         const bytes = await protectPdf(files[0], pdfPassword, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "download",
           blob,
-          url: URL.createObjectURL(blob),
+          url,
           filename: `protected_${files[0].name}`,
-          message: "PDF encrypted and password-protected successfully!",
+          size: blob.size,
+          message: "PDF encrypted with secure password protection.",
         });
       } else if (slug === "unlock-pdf") {
         const bytes = await unlockPdf(files[0], pdfPassword, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "download",
           blob,
-          url: URL.createObjectURL(blob),
+          url,
           filename: `unlocked_${files[0].name}`,
-          message: "PDF unlocked and password removed successfully!",
+          size: blob.size,
+          message: "Password restrictions removed. PDF is now unlocked.",
         });
       } else if (slug === "pdf-metadata") {
         const bytes = await updatePdfMetadata(files[0], pdfMeta, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "download",
           blob,
-          url: URL.createObjectURL(blob),
+          url,
           filename: `updated_${files[0].name}`,
-          message: "PDF metadata saved successfully!",
+          size: blob.size,
+          message: "PDF metadata updated successfully.",
         });
       } else if (slug === "pdf-page-size") {
         const bytes = await convertPdfPageSize(files[0], pdfPageSize, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "download",
           blob,
-          url: URL.createObjectURL(blob),
+          url,
           filename: `${pdfPageSize}_${files[0].name}`,
-          message: `Pages standardized to ${pdfPageSize} dimensions!`,
+          size: blob.size,
+          message: `Document page dimensions standardized to ${pdfPageSize}.`,
         });
       } else if (slug === "jpg-to-pdf" || slug === "png-to-pdf" || slug === "image-to-pdf") {
         const bytes = await imagesToPdf(files, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "download",
           blob,
-          url: URL.createObjectURL(blob),
+          url,
           filename: "images_converted.pdf",
-          message: `Converted ${files.length} image(s) into a unified PDF!`,
+          size: blob.size,
+          message: `Converted ${files.length} image(s) into a multi-page PDF.`,
         });
       }
 
       // --- IMAGE TOOLS ---
       else if (slug === "compress-image") {
         const comp = await compressImage(files[0], imageQuality / 100, setProgress);
+        const url = registerUrl(comp.url);
         setResult({
           type: "compress",
           ...comp,
+          url,
           filename: `compressed_${files[0].name}`,
+          previewUrl: url,
         });
       } else if (slug === "resize-image") {
         const resized = await resizeImage(
@@ -320,23 +374,29 @@ export default function ToolView({ tool }) {
           },
           setProgress
         );
+        const url = registerUrl(resized.url);
         setResult({
           type: "download",
           blob: resized.blob,
-          url: resized.url,
+          url,
           filename: `resized_${resized.width}x${resized.height}_${files[0].name}`,
-          message: `Image resized to ${resized.width} × ${resized.height} px!`,
+          size: resized.blob.size,
+          previewUrl: url,
+          message: `Image resized to ${resized.width} × ${resized.height} px.`,
         });
       } else if (slug === "convert-image") {
         const ext = convertFormat === "image/webp" ? ".webp" : convertFormat === "image/jpeg" ? ".jpg" : ".png";
         const converted = await convertImage(files[0], convertFormat, 0.9, setProgress);
         const base = files[0].name.replace(/\.[^/.]+$/, "");
+        const url = registerUrl(converted.url);
         setResult({
           type: "download",
           blob: converted.blob,
-          url: converted.url,
+          url,
           filename: `${base}${ext}`,
-          message: `Converted to ${convertFormat.replace("image/", "").toUpperCase()}!`,
+          size: converted.blob.size,
+          previewUrl: url,
+          message: `Image converted to ${convertFormat.replace("image/", "").toUpperCase()}.`,
         });
       } else if (slug === "crop-image") {
         const cropped = await cropImage(
@@ -344,21 +404,27 @@ export default function ToolView({ tool }) {
           { x: 0, y: 0, width: parseInt(cropWidth, 10), height: parseInt(cropHeight, 10) },
           setProgress
         );
+        const url = registerUrl(cropped.url);
         setResult({
           type: "download",
           blob: cropped.blob,
-          url: cropped.url,
+          url,
           filename: `cropped_${files[0].name}`,
-          message: `Image cropped to ${cropped.width} × ${cropped.height} px!`,
+          size: cropped.blob.size,
+          previewUrl: url,
+          message: `Image cropped to ${cropped.width} × ${cropped.height} px.`,
         });
       } else if (slug === "rotate-image") {
         const rot = await rotateAndFlipImage(files[0], Number(rotationAngle), false, false, setProgress);
+        const url = registerUrl(rot.url);
         setResult({
           type: "download",
           blob: rot.blob,
-          url: rot.url,
+          url,
           filename: `rotated_${files[0].name}`,
-          message: `Rotated image by ${rotationAngle}°!`,
+          size: rot.blob.size,
+          previewUrl: url,
+          message: `Image rotated by ${rotationAngle}°.`,
         });
       } else if (slug === "image-dpi-calculator") {
         const meta = await getImageMetadata(files[0]);
@@ -381,15 +447,18 @@ export default function ToolView({ tool }) {
       // --- FILE PROCESSING TOOLS ---
       else if (slug === "create-zip") {
         const zip = await createZip(files, zipName, setProgress);
+        const url = registerUrl(zip.url);
         setResult({
           type: "download",
           blob: zip.blob,
-          url: zip.url,
+          url,
           filename: zip.fileName,
-          message: `Packaged ${files.length} files into ZIP archive!`,
+          size: zip.size,
+          message: `Packaged ${files.length} file(s) into ZIP archive.`,
         });
       } else if (slug === "extract-zip") {
         const entries = await extractZip(files[0], setProgress);
+        entries.forEach((e) => registerUrl(e.url));
         setResult({
           type: "zip-entries",
           entries,
@@ -430,12 +499,14 @@ export default function ToolView({ tool }) {
           },
           setProgress
         );
+        const url = registerUrl(renamed.url);
         setResult({
           type: "download",
           blob: renamed.blob,
-          url: renamed.url,
+          url,
           filename: renamed.fileName,
-          message: `Renamed ${files.length} files and packaged into ZIP!`,
+          size: renamed.blob.size,
+          message: `Renamed ${files.length} file(s) and packaged into ZIP.`,
           details: renamed.renamedList,
         });
       } else if (slug === "document-page-counter") {
@@ -455,7 +526,7 @@ export default function ToolView({ tool }) {
         });
       }
     } catch (err) {
-      console.error(err);
+      console.error("Processing error:", err);
       setError(err.message || "An unexpected error occurred during processing.");
     } finally {
       setProcessing(false);
@@ -463,10 +534,9 @@ export default function ToolView({ tool }) {
   };
 
   return (
-    <div className="w-full bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none">
-      {/* Tool Processing Controls */}
+    <div className="w-full bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-slate-800 shadow-sm">
       <div className="space-y-6">
-        {/* Upload Dropzone */}
+        {/* Upload Area */}
         <FileDropzone
           accept={tool.accept}
           multiple={tool.multiple}
@@ -480,33 +550,33 @@ export default function ToolView({ tool }) {
           title={tool.multiple ? `Drop ${tool.name} files here` : `Drop your ${tool.name} file here`}
         />
 
-        {/* Dynamic Tool Settings Configuration */}
-        {files.length > 0 && (
+        {/* Configuration State (When files are selected) */}
+        {files.length > 0 && !result && (
           <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-4">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-              <Sparkles className="w-4 h-4 text-brand-500" />
-              <span>Tool Options & Parameters</span>
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+              <Sliders className="w-4 h-4 text-brand-500" />
+              <span>Processing Settings</span>
             </div>
 
             {/* Split PDF settings */}
             {tool.slug === "split-pdf" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Split Mode
                   </label>
                   <select
                     value={splitMode}
                     onChange={(e) => setSplitMode(e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500"
                   >
-                    <option value="range">Extract Page Range</option>
-                    <option value="single">Split into Individual Single Pages (ZIP)</option>
+                    <option value="range">Extract Custom Page Range</option>
+                    <option value="single">Split Every Page into Individual Files (ZIP)</option>
                   </select>
                 </div>
                 {splitMode === "range" && (
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                       Page Ranges (e.g. 1-3, 5)
                     </label>
                     <input
@@ -514,7 +584,7 @@ export default function ToolView({ tool }) {
                       value={pdfRange}
                       onChange={(e) => setPdfRange(e.target.value)}
                       placeholder="1-3, 5"
-                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500"
                     />
                   </div>
                 )}
@@ -525,13 +595,13 @@ export default function ToolView({ tool }) {
             {tool.slug === "rotate-pdf" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Rotation Angle
                   </label>
                   <select
                     value={rotationAngle}
                     onChange={(e) => setRotationAngle(Number(e.target.value))}
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500"
                   >
                     <option value={90}>90° Clockwise</option>
                     <option value={180}>180° Flip</option>
@@ -539,13 +609,13 @@ export default function ToolView({ tool }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Apply To
                   </label>
                   <select
                     value={rotationSelection}
                     onChange={(e) => setRotationSelection(e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500"
                   >
                     <option value="all">All Pages</option>
                     <option value="odd">Odd Pages Only</option>
@@ -558,15 +628,15 @@ export default function ToolView({ tool }) {
             {/* Delete PDF Pages settings */}
             {tool.slug === "delete-pdf-pages" && (
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Pages to Remove (e.g. 1, 3, 5-7)
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Pages to Remove (e.g., 2, 4-6)
                 </label>
                 <input
                   type="text"
                   value={deletePagesInput}
                   onChange={(e) => setDeletePagesInput(e.target.value)}
                   placeholder="2, 4-6"
-                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500"
                 />
               </div>
             )}
@@ -574,15 +644,15 @@ export default function ToolView({ tool }) {
             {/* Extract PDF Pages settings */}
             {tool.slug === "extract-pdf-pages" && (
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Pages to Extract (e.g. 1, 3-5)
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Pages to Extract (e.g., 1, 3-5)
                 </label>
                 <input
                   type="text"
                   value={extractPagesInput}
                   onChange={(e) => setExtractPagesInput(e.target.value)}
                   placeholder="1, 3-5"
-                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500"
                 />
               </div>
             )}
@@ -590,24 +660,24 @@ export default function ToolView({ tool }) {
             {/* Organize PDF settings */}
             {tool.slug === "organize-pdf" && (
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Desired Page Order Sequence (e.g. 3, 1, 2)
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  New Desired Page Sequence (e.g. 3, 1, 2)
                 </label>
                 <input
                   type="text"
                   value={organizeOrderInput}
                   onChange={(e) => setOrganizeOrderInput(e.target.value)}
                   placeholder="3, 1, 2"
-                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500"
                 />
               </div>
             )}
 
-            {/* Add Watermark settings */}
+            {/* Watermark settings */}
             {tool.slug === "add-watermark" && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Watermark Text
                   </label>
                   <input
@@ -615,11 +685,11 @@ export default function ToolView({ tool }) {
                     value={watermarkText}
                     onChange={(e) => setWatermarkText(e.target.value)}
                     placeholder="CONFIDENTIAL"
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Opacity ({Math.round(watermarkOpacity * 100)}%)
                   </label>
                   <input
@@ -633,30 +703,30 @@ export default function ToolView({ tool }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Font Size ({watermarkFontSize}px)
                   </label>
                   <input
                     type="number"
                     value={watermarkFontSize}
                     onChange={(e) => setWatermarkFontSize(e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500"
                   />
                 </div>
               </div>
             )}
 
-            {/* Add Page Numbers settings */}
+            {/* Page Numbers settings */}
             {tool.slug === "add-page-numbers" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Numbering Format
                   </label>
                   <select
                     value={pageNumberFormat}
                     onChange={(e) => setPageNumberFormat(e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500"
                   >
                     <option value="Page {n} of {total}">Page X of Y</option>
                     <option value="{n}">Page number only (X)</option>
@@ -664,13 +734,13 @@ export default function ToolView({ tool }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Position on Page
                   </label>
                   <select
                     value={pageNumberPos}
                     onChange={(e) => setPageNumberPos(e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500"
                   >
                     <option value="bottom-center">Bottom Center</option>
                     <option value="bottom-right">Bottom Right</option>
@@ -685,15 +755,15 @@ export default function ToolView({ tool }) {
             {/* Protect / Unlock PDF settings */}
             {(tool.slug === "protect-pdf" || tool.slug === "unlock-pdf") && (
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  {tool.slug === "protect-pdf" ? "Set Document Password" : "Enter Document Password"}
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  {tool.slug === "protect-pdf" ? "Set Document Password" : "Enter Existing Document Password"}
                 </label>
                 <input
                   type="password"
                   value={pdfPassword}
                   onChange={(e) => setPdfPassword(e.target.value)}
                   placeholder="Enter secure password"
-                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500"
                 />
               </div>
             )}
@@ -702,7 +772,7 @@ export default function ToolView({ tool }) {
             {tool.slug === "pdf-metadata" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Document Title
                   </label>
                   <input
@@ -714,7 +784,7 @@ export default function ToolView({ tool }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Author
                   </label>
                   <input
@@ -731,8 +801,8 @@ export default function ToolView({ tool }) {
             {/* PDF Page Size settings */}
             {tool.slug === "pdf-page-size" && (
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Target Standard Dimensions
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Target Dimensions
                 </label>
                 <select
                   value={pdfPageSize}
@@ -750,11 +820,11 @@ export default function ToolView({ tool }) {
             {tool.slug === "compress-image" && (
               <div>
                 <div className="flex justify-between items-center mb-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Compression Quality
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Compression Quality: {imageQuality}%
                   </label>
                   <span className="text-xs font-bold text-brand-600 dark:text-brand-400">
-                    {imageQuality}%
+                    {imageQuality < 50 ? "Aggressive (Smallest)" : imageQuality < 80 ? "Balanced (Recommended)" : "High Fidelity"}
                   </span>
                 </div>
                 <input
@@ -765,10 +835,6 @@ export default function ToolView({ tool }) {
                   onChange={(e) => setImageQuality(Number(e.target.value))}
                   className="w-full"
                 />
-                <div className="flex justify-between text-[11px] text-slate-400 mt-1">
-                  <span>Smaller Size (More compressed)</span>
-                  <span>Higher Quality</span>
-                </div>
               </div>
             )}
 
@@ -776,7 +842,7 @@ export default function ToolView({ tool }) {
             {tool.slug === "resize-image" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Target Width (px)
                   </label>
                   <input
@@ -787,7 +853,7 @@ export default function ToolView({ tool }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Target Height (px)
                   </label>
                   <input
@@ -804,7 +870,7 @@ export default function ToolView({ tool }) {
             {/* Convert Image settings */}
             {tool.slug === "convert-image" && (
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Target Output Format
                 </label>
                 <select
@@ -812,7 +878,7 @@ export default function ToolView({ tool }) {
                   onChange={(e) => setConvertFormat(e.target.value)}
                   className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
                 >
-                  <option value="image/webp">WebP (Modern, highly compressed)</option>
+                  <option value="image/webp">WebP (Modern, highly efficient)</option>
                   <option value="image/jpeg">JPG / JPEG (Standard photo format)</option>
                   <option value="image/png">PNG (Lossless with transparency)</option>
                 </select>
@@ -822,16 +888,16 @@ export default function ToolView({ tool }) {
             {/* Image DPI calculator settings */}
             {tool.slug === "image-dpi-calculator" && (
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Target Print DPI (Dots Per Inch)
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Target Print DPI
                 </label>
                 <select
                   value={imageDpi}
                   onChange={(e) => setImageDpi(Number(e.target.value))}
                   className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
                 >
-                  <option value={300}>300 DPI — Fine Art & Professional Print</option>
-                  <option value={150}>150 DPI — Good Office / Brochure Print</option>
+                  <option value={300}>300 DPI — Photo Quality &amp; Commercial Print</option>
+                  <option value={150}>150 DPI — Good Office / Flyer Print</option>
                   <option value={72}>72 DPI — Standard Web Screen</option>
                 </select>
               </div>
@@ -840,8 +906,8 @@ export default function ToolView({ tool }) {
             {/* Create ZIP settings */}
             {tool.slug === "create-zip" && (
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  ZIP Archive Name
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Archive Name
                 </label>
                 <input
                   type="text"
@@ -857,7 +923,7 @@ export default function ToolView({ tool }) {
             {tool.slug === "batch-file-renaming" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Renaming Strategy
                   </label>
                   <select
@@ -868,13 +934,13 @@ export default function ToolView({ tool }) {
                     <option value="prefix">Add Prefix</option>
                     <option value="suffix">Add Suffix</option>
                     <option value="numbering">Sequential Numbering</option>
-                    <option value="replace">Find & Replace</option>
+                    <option value="replace">Find &amp; Replace</option>
                   </select>
                 </div>
                 {renameRule === "prefix" && (
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Prefix to Prepend
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Prefix String
                     </label>
                     <input
                       type="text"
@@ -897,7 +963,7 @@ export default function ToolView({ tool }) {
                       type="text"
                       value={renameReplace}
                       onChange={(e) => setRenameReplace(e.target.value)}
-                      placeholder="Replace with"
+                      placeholder="Replace"
                       className="w-full px-2 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
                     />
                   </div>
@@ -909,75 +975,114 @@ export default function ToolView({ tool }) {
 
         {/* Error Display */}
         {error && (
-          <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 rounded-2xl text-sm">
+          <div
+            role="alert"
+            className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 rounded-2xl text-xs sm:text-sm"
+          >
             <AlertCircle className="w-5 h-5 shrink-0" />
-            <span>{error}</span>
+            <span className="font-medium">{error}</span>
           </div>
         )}
 
-        {/* Progress Bar */}
+        {/* Processing State (Real Measurable Progress) */}
         {processing && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs font-medium text-slate-600 dark:text-slate-300">
-              <span className="flex items-center gap-1.5">
+          <div className="space-y-2 py-2">
+            <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <span className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-brand-500 animate-ping" />
-                Processing directly in browser memory...
+                <span>Processing in local browser memory...</span>
               </span>
-              <span>{progress}%</span>
+              <span className="font-mono">{progress}%</span>
             </div>
             <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-brand-500 to-indigo-500 rounded-full transition-all duration-200"
+                className="h-full bg-brand-600 rounded-full transition-all duration-150"
                 style={{ width: `${progress}%` }}
               />
             </div>
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={executeProcess}
-            disabled={files.length === 0 || processing}
-            className="flex-1 min-w-[200px] flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl font-semibold text-white bg-brand-600 hover:bg-brand-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-brand-500/25 transition-all text-sm"
-          >
-            <DynamicIcon name={tool.icon} className="w-5 h-5" />
-            <span>{processing ? "Processing File..." : `Run ${tool.name}`}</span>
-          </button>
+        {/* Action Button Bar */}
+        {!result && (
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={executeProcess}
+              disabled={files.length === 0 || processing}
+              className="flex-1 min-w-[200px] flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl font-bold text-white bg-brand-600 hover:bg-brand-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all text-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/30"
+            >
+              <DynamicIcon name={tool.icon} className="w-4 h-4" />
+              <span>{processing ? "Processing..." : `Process with ${tool.name}`}</span>
+            </button>
 
-          {files.length > 0 && (
+            {files.length > 0 && !processing && (
+              <button
+                type="button"
+                onClick={handleReset}
+                className="py-3.5 px-5 rounded-2xl font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-sm flex items-center gap-2"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Reset</span>
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* --- RESULT EXPERIENCE --- */}
+      {result && (
+        <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 animate-in fade-in duration-300 space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
+              <CheckCircle2 className="w-5 h-5" />
+              <span>Task Complete!</span>
+            </div>
             <button
               type="button"
               onClick={handleReset}
-              disabled={processing}
-              className="py-3.5 px-5 rounded-2xl font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-sm flex items-center gap-2"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
             >
-              <RotateCcw className="w-4 h-4" />
-              <span>Reset</span>
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Process another file</span>
             </button>
-          )}
-        </div>
-      </div>
-
-      {/* --- RESULTS SECTION --- */}
-      {result && (
-        <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 animate-in fade-in duration-300 space-y-6">
-          <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
-            <CheckCircle2 className="w-5 h-5" />
-            <span>Processing Complete!</span>
           </div>
 
-          {/* Standard Download Result */}
+          {/* Visual In-Browser Preview for Images */}
+          {result.previewUrl && (
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 space-y-2">
+              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <Eye className="w-3.5 h-3.5" />
+                <span>Visual Result Preview</span>
+              </div>
+              <div className="flex justify-center max-h-72 overflow-hidden rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={result.previewUrl}
+                  alt="Processed preview"
+                  className="max-h-64 object-contain rounded-lg"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Standard Download Box */}
           {result.type === "download" && (
             <div className="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 space-y-4">
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                {result.message}
-              </p>
+              <div>
+                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  {result.message}
+                </p>
+                {result.size && (
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Output size: {formatBytes(result.size)}
+                  </p>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={() => triggerDownload(result.url, result.filename)}
-                className="inline-flex items-center gap-2 py-3 px-6 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/20 transition-all text-sm"
+                className="inline-flex items-center gap-2 py-3.5 px-6 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/20 transition-all text-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Download {result.filename}</span>
@@ -985,31 +1090,31 @@ export default function ToolView({ tool }) {
             </div>
           )}
 
-          {/* Image Compression Result */}
+          {/* Image Compression Results with Savings Metrics */}
           {result.type === "compress" && (
-            <div className="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+            <div className="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 space-y-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-                  <span className="text-xs text-slate-400 block">Original Size</span>
-                  <span className="font-bold text-slate-700 dark:text-slate-200">
-                    {(result.originalSize / 1024).toFixed(1)} KB
+                  <span className="text-[11px] font-medium text-slate-400 block">Original</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
+                    {formatBytes(result.originalSize)}
                   </span>
                 </div>
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-                  <span className="text-xs text-slate-400 block">Compressed Size</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                    {(result.compressedSize / 1024).toFixed(1)} KB
+                  <span className="text-[11px] font-medium text-slate-400 block">Compressed</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                    {formatBytes(result.compressedSize)}
                   </span>
                 </div>
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-                  <span className="text-xs text-slate-400 block">Space Saved</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                  <span className="text-[11px] font-medium text-slate-400 block">Saved</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
                     {result.savedPercentage}%
                   </span>
                 </div>
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-                  <span className="text-xs text-slate-400 block">Format</span>
-                  <span className="font-bold text-slate-700 dark:text-slate-200">
+                  <span className="text-[11px] font-medium text-slate-400 block">Format</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
                     {result.type.replace("image/", "").toUpperCase()}
                   </span>
                 </div>
@@ -1017,19 +1122,19 @@ export default function ToolView({ tool }) {
               <button
                 type="button"
                 onClick={() => triggerDownload(result.url, result.filename)}
-                className="inline-flex items-center gap-2 py-3 px-6 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/20 transition-all text-sm"
+                className="inline-flex items-center gap-2 py-3.5 px-6 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition-all text-sm"
               >
                 <Download className="w-4 h-4" />
-                <span>Download Optimized Image</span>
+                <span>Download Compressed Image</span>
               </button>
             </div>
           )}
 
-          {/* Cryptographic Hashes Result */}
+          {/* Cryptographic Hashes Output */}
           {result.type === "hashes" && (
             <div className="space-y-3">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Calculated Checksums for &quot;{result.hashData.fileName}&quot;
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Calculated Fingerprints for &quot;{result.hashData.fileName}&quot;
               </h4>
               <div className="space-y-2">
                 {Object.entries(result.hashData.hashes).map(([algo, hash]) => (
@@ -1071,11 +1176,9 @@ export default function ToolView({ tool }) {
           {/* Extracted ZIP Entries */}
           {result.type === "zip-entries" && (
             <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Extracted Files ({result.entries.length})
-                </h4>
-              </div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Extracted Files from &quot;{result.zipFileName}&quot; ({result.entries.length})
+              </h4>
               <div className="space-y-2 max-h-72 overflow-y-auto">
                 {result.entries.map((entry, idx) => (
                   <div
@@ -1083,17 +1186,18 @@ export default function ToolView({ tool }) {
                     className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-sm"
                   >
                     <div className="truncate mr-2">
-                      <span className="font-medium text-slate-800 dark:text-slate-200 block truncate">
+                      <span className="font-semibold text-xs sm:text-sm text-slate-800 dark:text-slate-200 block truncate">
                         {entry.name}
                       </span>
-                      <span className="text-xs text-slate-400">
-                        {(entry.size / 1024).toFixed(1)} KB
+                      <span className="text-[11px] text-slate-400">
+                        {formatBytes(entry.size)}
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={() => triggerDownload(entry.url, entry.name)}
                       className="p-2 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 shrink-0"
+                      title="Download file"
                     >
                       <Download className="w-4 h-4" />
                     </button>
@@ -1103,13 +1207,13 @@ export default function ToolView({ tool }) {
             </div>
           )}
 
-          {/* Text Diff Result */}
+          {/* File Comparison Diff Output */}
           {result.type === "diff" && (
             <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500">
-                <span>File Comparison Diff Report</span>
+              <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500">
+                <span>Side-by-Side Diff Report</span>
                 <span className={result.diff.identical ? "text-emerald-500" : "text-amber-500"}>
-                  {result.diff.identical ? "Files are Identical" : `${result.diff.differencesCount} line differences found`}
+                  {result.diff.identical ? "Files are Identical" : `${result.diff.differencesCount} line difference(s) detected`}
                 </span>
               </div>
               <div className="max-h-80 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 font-mono text-xs divide-y divide-slate-100 dark:divide-slate-800">
@@ -1136,25 +1240,25 @@ export default function ToolView({ tool }) {
             </div>
           )}
 
-          {/* File Analysis Result */}
+          {/* File Storage Analysis */}
           {result.type === "file-analysis" && (
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Total Files</span>
-                  <span className="font-bold text-slate-800 dark:text-white">
+                  <span className="text-[11px] text-slate-400 block">Total Files</span>
+                  <span className="font-bold text-slate-800 dark:text-white text-sm">
                     {result.analysis.totalFiles}
                   </span>
                 </div>
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Total Volume</span>
-                  <span className="font-bold text-brand-600 dark:text-brand-400">
+                  <span className="text-[11px] text-slate-400 block">Total Storage</span>
+                  <span className="font-bold text-brand-600 dark:text-brand-400 text-sm">
                     {result.analysis.totalFormattedSize}
                   </span>
                 </div>
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Average File</span>
-                  <span className="font-bold text-slate-800 dark:text-white">
+                  <span className="text-[11px] text-slate-400 block">Average File</span>
+                  <span className="font-bold text-slate-800 dark:text-white text-sm">
                     {result.analysis.averageSize}
                   </span>
                 </div>
@@ -1185,31 +1289,31 @@ export default function ToolView({ tool }) {
             </div>
           )}
 
-          {/* Image DPI Calculation Result */}
+          {/* Image DPI Calculations */}
           {result.type === "dpi-calc" && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Pixels</span>
-                  <span className="font-bold text-slate-800 dark:text-white">
+                  <span className="text-[11px] text-slate-400 block">Pixels</span>
+                  <span className="font-bold text-slate-800 dark:text-white text-xs sm:text-sm">
                     {result.meta.width} × {result.meta.height}
                   </span>
                 </div>
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Print (Inches)</span>
-                  <span className="font-bold text-brand-600 dark:text-brand-400">
+                  <span className="text-[11px] text-slate-400 block">Print (Inches)</span>
+                  <span className="font-bold text-brand-600 dark:text-brand-400 text-xs sm:text-sm">
                     {result.calc.inches}
                   </span>
                 </div>
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Print (Centimeters)</span>
-                  <span className="font-bold text-brand-600 dark:text-brand-400">
+                  <span className="text-[11px] text-slate-400 block">Print (Centimeters)</span>
+                  <span className="font-bold text-brand-600 dark:text-brand-400 text-xs sm:text-sm">
                     {result.calc.cm}
                   </span>
                 </div>
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Print Rating</span>
-                  <span className="font-bold text-emerald-500">
+                  <span className="text-[11px] text-slate-400 block">Print Rating</span>
+                  <span className="font-bold text-emerald-500 text-xs sm:text-sm">
                     {result.calc.printQuality}
                   </span>
                 </div>
@@ -1217,14 +1321,14 @@ export default function ToolView({ tool }) {
             </div>
           )}
 
-          {/* Document Page Count Result */}
+          {/* Document Page Counts */}
           {result.type === "page-count" && (
             <div className="space-y-4">
               <div className="p-4 bg-brand-50 dark:bg-brand-950/30 border border-brand-200 dark:border-brand-900/40 rounded-2xl flex items-center justify-between">
                 <span className="text-sm font-semibold text-brand-900 dark:text-brand-200">
                   Total Aggregate Page Count:
                 </span>
-                <span className="text-2xl font-extrabold text-brand-600 dark:text-brand-400">
+                <span className="text-2xl font-black text-brand-600 dark:text-brand-400">
                   {result.total} Pages
                 </span>
               </div>

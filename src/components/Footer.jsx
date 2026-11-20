@@ -18,7 +18,7 @@ export default function Footer() {
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-500 to-indigo-500 flex items-center justify-center text-white shadow-md">
                 <FileCheck2 className="w-5 h-5" />
               </div>
-              <span className="font-extrabold text-2xl tracking-tight text-white">
+              <span className="font-black text-2xl tracking-tight text-white">
                 PDF<span className="text-brand-400">padar</span>
               </span>
             </Link>
@@ -26,14 +26,14 @@ export default function Footer() {
               Fast, privacy-first, in-browser file utility suite. Process PDFs, optimize images, generate hashes, and bundle archives with 100% client-side execution.
             </p>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-800 text-xs text-emerald-300 font-medium">
-              <Lock className="w-4 h-4 text-emerald-400" />
-              <span>Zero-server storage • Files never leave your device</span>
+              <Lock className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Zero server storage • Files never leave your device</span>
             </div>
           </div>
 
           {/* PDF Tools Column */}
           <div className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Popular PDF Tools
             </h3>
             <ul className="space-y-2 text-sm">
@@ -52,7 +52,7 @@ export default function Footer() {
 
           {/* Image Tools Column */}
           <div className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Image Tools
             </h3>
             <ul className="space-y-2 text-sm">
@@ -71,7 +71,7 @@ export default function Footer() {
 
           {/* File Tools Column */}
           <div className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
               File Utilities
             </h3>
             <ul className="space-y-2 text-sm">
@@ -89,12 +89,18 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Credits & Copyright */}
+        {/* Bottom Credits, Legal Links & Copyright */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>© {new Date().getFullYear()} PDFpadar. Built with privacy and speed in mind.</p>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
+            <Link href="/privacy" className="hover:text-slate-300 transition-colors">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="hover:text-slate-300 transition-colors">
+              Terms of Service
+            </Link>
             <span className="flex items-center gap-1 text-slate-400">
-              Powered by WebAssembly & Web Workers <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              Powered by WebAssembly &amp; Web Workers <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             </span>
           </div>
         </div>
