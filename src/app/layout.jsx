@@ -18,6 +18,14 @@ export const metadata = {
     "online pdf editor free",
   ],
   authors: [{ name: "PDFpadar Team" }],
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/apple-icon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export const viewport = {
