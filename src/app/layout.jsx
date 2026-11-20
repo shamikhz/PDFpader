@@ -37,7 +37,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
+      <body className="min-h-screen flex flex-col font-sans antialiased bg-[#fcf0e2] text-[#22140a] dark:bg-[#100804] dark:text-[#fdf2e6] selection:bg-brand-500 selection:text-white">
         <ThemeProvider>
           <Navbar />
           <main className="flex-1">{children}</main>

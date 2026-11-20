@@ -17,9 +17,10 @@ export function ThemeProvider({ children }) {
     if (savedTheme) {
       setTheme(savedTheme);
       document.documentElement.classList.toggle("dark", savedTheme === "dark");
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
+    } else {
+      // Default to the soothing light-orange theme
+      setTheme("light");
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 

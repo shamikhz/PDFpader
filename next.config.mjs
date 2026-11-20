@@ -4,18 +4,9 @@ const nextConfig = {
   swcMinify: true,
   poweredByHeader: false,
   compress: true,
-  headers: async () => {
-    return [
-      {
-        source: "/:all*(svg|jpg|png|webp|avif|ico|css|js)",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-    ];
+  webpack: (config) => {
+    config.resolve.alias.canvas = false;
+    return config;
   },
 };
 

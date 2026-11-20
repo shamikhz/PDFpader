@@ -30,11 +30,16 @@ html {
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--background, #fcf0e2);
+  color: var(--foreground, #22140a);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   min-height: 100vh;
   line-height: 1.6;
+}
+
+.dark body {
+  background-color: var(--background, #100804);
+  color: var(--foreground, #fdf2e6);
 }
 
 /* Custom scrollbars with warm amber-apricot tones */
