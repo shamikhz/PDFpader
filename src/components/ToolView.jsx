@@ -1095,25 +1095,25 @@ export default function ToolView({ tool }) {
             <div className="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 space-y-5">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-                  <span className="text-[11px] font-medium text-slate-400 block">Original</span>
+                  <span className="text-xs font-medium text-slate-400 block">Original</span>
                   <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
                     {formatBytes(result.originalSize)}
                   </span>
                 </div>
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-                  <span className="text-[11px] font-medium text-slate-400 block">Compressed</span>
+                  <span className="text-xs font-medium text-slate-400 block">Compressed</span>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
                     {formatBytes(result.compressedSize)}
                   </span>
                 </div>
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-                  <span className="text-[11px] font-medium text-slate-400 block">Saved</span>
+                  <span className="text-xs font-medium text-slate-400 block">Saved</span>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
                     {result.savedPercentage}%
                   </span>
                 </div>
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-                  <span className="text-[11px] font-medium text-slate-400 block">Format</span>
+                  <span className="text-xs font-medium text-slate-400 block">Format</span>
                   <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
                     {result.type.replace("image/", "").toUpperCase()}
                   </span>
@@ -1189,7 +1189,7 @@ export default function ToolView({ tool }) {
                       <span className="font-semibold text-xs sm:text-sm text-slate-800 dark:text-slate-200 block truncate">
                         {entry.name}
                       </span>
-                      <span className="text-[11px] text-slate-400">
+                      <span className="text-xs text-slate-400">
                         {formatBytes(entry.size)}
                       </span>
                     </div>
@@ -1245,19 +1245,19 @@ export default function ToolView({ tool }) {
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-[11px] text-slate-400 block">Total Files</span>
+                  <span className="text-xs text-slate-400 block">Total Files</span>
                   <span className="font-bold text-slate-800 dark:text-white text-sm">
                     {result.analysis.totalFiles}
                   </span>
                 </div>
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-[11px] text-slate-400 block">Total Storage</span>
+                  <span className="text-xs text-slate-400 block">Total Storage</span>
                   <span className="font-bold text-brand-600 dark:text-brand-400 text-sm">
                     {result.analysis.totalFormattedSize}
                   </span>
                 </div>
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-[11px] text-slate-400 block">Average File</span>
+                  <span className="text-xs text-slate-400 block">Average File</span>
                   <span className="font-bold text-slate-800 dark:text-white text-sm">
                     {result.analysis.averageSize}
                   </span>
@@ -1294,25 +1294,25 @@ export default function ToolView({ tool }) {
             <div className="space-y-4">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-[11px] text-slate-400 block">Pixels</span>
+                  <span className="text-xs text-slate-400 block">Pixels</span>
                   <span className="font-bold text-slate-800 dark:text-white text-xs sm:text-sm">
                     {result.meta.width} × {result.meta.height}
                   </span>
                 </div>
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-[11px] text-slate-400 block">Print (Inches)</span>
+                  <span className="text-xs text-slate-400 block">Print (Inches)</span>
                   <span className="font-bold text-brand-600 dark:text-brand-400 text-xs sm:text-sm">
                     {result.calc.inches}
                   </span>
                 </div>
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-[11px] text-slate-400 block">Print (Centimeters)</span>
+                  <span className="text-xs text-slate-400 block">Print (Centimeters)</span>
                   <span className="font-bold text-brand-600 dark:text-brand-400 text-xs sm:text-sm">
                     {result.calc.cm}
                   </span>
                 </div>
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-[11px] text-slate-400 block">Print Rating</span>
+                  <span className="text-xs text-slate-400 block">Print Rating</span>
                   <span className="font-bold text-emerald-500 text-xs sm:text-sm">
                     {result.calc.printQuality}
                   </span>

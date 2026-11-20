@@ -108,11 +108,10 @@ export default function FileDropzone({
           }
         }}
         aria-label="Upload file drop area"
-        className={`relative border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-200 outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 ${
-          isDragging
+        className={`relative border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all duration-200 outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 ${isDragging
             ? "border-brand-500 bg-brand-50/60 dark:bg-brand-950/30 scale-[0.99]"
             : "border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 hover:border-brand-400 dark:hover:border-brand-500 hover:bg-slate-50 dark:hover:bg-slate-800/40"
-        }`}
+          }`}
       >
         <input
           ref={inputRef}
@@ -147,7 +146,7 @@ export default function FileDropzone({
           </div>
 
           {/* Formats & Size Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-3 text-[11px] text-slate-500 dark:text-slate-400">
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-3 text-xs text-slate-500 dark:text-slate-400">
             <span className="px-2 py-0.5 rounded-md bg-slate-200/60 dark:bg-slate-800 font-mono">
               Max {maxSizeMB} MB
             </span>
@@ -202,7 +201,7 @@ export default function FileDropzone({
                     <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">
                       {file.name}
                     </p>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-xs text-slate-400">
                       {formatBytes(file.size)}
                     </p>
                   </div>

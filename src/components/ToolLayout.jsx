@@ -61,13 +61,13 @@ export default function ToolLayout({ tool, relatedTools = [] }) {
 
         {/* 5. Supported Formats & Limitations */}
         <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-xs text-slate-500 dark:text-slate-400">
-          <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 font-mono text-[11px]">
+          <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 font-mono text-xs">
             Formats: {tool.accept.replace(/application\/[a-z0-9-]+,?/gi, "").replace(/image\/[a-z0-9*-,]+/gi, "Images")}
           </span>
-          <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 font-mono text-[11px]">
+          <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 font-mono text-xs">
             Max Limit: {tool.maxSizeMB} MB
           </span>
-          <span className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-medium text-[11px]">
+          <span className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-medium text-xs">
             Zero Uploads • Pure Privacy
           </span>
         </div>
@@ -181,11 +181,11 @@ export default function ToolLayout({ tool, relatedTools = [] }) {
                   <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400">
                     {rel.name}
                   </h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
                     {rel.shortDesc}
                   </p>
                 </div>
-                <div className="flex items-center gap-1 text-[11px] font-bold text-brand-600 dark:text-brand-400 pt-3">
+                <div className="flex items-center gap-1 text-xs font-bold text-brand-600 dark:text-brand-400 pt-3">
                   <span>Open Tool</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </div>

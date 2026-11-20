@@ -104,7 +104,7 @@ export default function Navbar() {
               <span className="font-black text-xl tracking-tight text-slate-900 dark:text-white">
                 PDF<span className="text-brand-600 dark:text-brand-400">padar</span>
               </span>
-              <span className="hidden sm:inline-block ml-2 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="hidden sm:inline-block ml-2 text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                 100% Client-Side
               </span>
             </div>
@@ -132,7 +132,7 @@ export default function Navbar() {
 
               {activeDropdown === "pdf" && (
                 <div className="absolute left-0 mt-2 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-2 z-50 animate-in fade-in duration-150">
-                  <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
                     PDF Manipulation Suite
                   </div>
                   <div className="space-y-0.5 max-h-96 overflow-y-auto">
@@ -150,7 +150,7 @@ export default function Navbar() {
                           <p className="font-semibold text-xs text-slate-800 dark:text-slate-200 group-hover:text-brand-600 dark:group-hover:text-brand-400">
                             {tool.name}
                           </p>
-                          <p className="text-[11px] text-slate-400 line-clamp-1">{tool.shortDesc}</p>
+                          <p className="text-xs text-slate-400 line-clamp-1">{tool.shortDesc}</p>
                         </div>
                       </Link>
                     ))}
@@ -179,7 +179,7 @@ export default function Navbar() {
 
               {activeDropdown === "image" && (
                 <div className="absolute left-0 mt-2 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-2 z-50 animate-in fade-in duration-150">
-                  <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
                     Image Optimization &amp; Canvas
                   </div>
                   <div className="space-y-0.5 max-h-96 overflow-y-auto">
@@ -197,7 +197,7 @@ export default function Navbar() {
                           <p className="font-semibold text-xs text-slate-800 dark:text-slate-200 group-hover:text-brand-600 dark:group-hover:text-brand-400">
                             {tool.name}
                           </p>
-                          <p className="text-[11px] text-slate-400 line-clamp-1">{tool.shortDesc}</p>
+                          <p className="text-xs text-slate-400 line-clamp-1">{tool.shortDesc}</p>
                         </div>
                       </Link>
                     ))}
@@ -226,7 +226,7 @@ export default function Navbar() {
 
               {activeDropdown === "file" && (
                 <div className="absolute left-0 mt-2 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-2 z-50 animate-in fade-in duration-150">
-                  <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
                     Archiving &amp; Cryptographic Tools
                   </div>
                   <div className="space-y-0.5 max-h-96 overflow-y-auto">
@@ -244,7 +244,7 @@ export default function Navbar() {
                           <p className="font-semibold text-xs text-slate-800 dark:text-slate-200 group-hover:text-brand-600 dark:group-hover:text-brand-400">
                             {tool.name}
                           </p>
-                          <p className="text-[11px] text-slate-400 line-clamp-1">{tool.shortDesc}</p>
+                          <p className="text-xs text-slate-400 line-clamp-1">{tool.shortDesc}</p>
                         </div>
                       </Link>
                     ))}

@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  font-size: 18px;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 16.5px;
+  }
+}
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
@@ -21,6 +32,7 @@ body {
   color: var(--foreground);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   min-height: 100vh;
+  line-height: 1.6;
 }
 
 /* Custom scrollbars */
