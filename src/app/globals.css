@@ -14,17 +14,19 @@ html {
 }
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  /* Soothing, low-strain warm-paper background & crisp high-contrast text */
+  --background: #f7f9fa;
+  --foreground: #141d26;
   --card-bg: #ffffff;
   --card-border: #e2e8f0;
 }
 
 .dark {
-  --background: #090d16;
-  --foreground: #f8fafc;
-  --card-bg: #111827;
-  --card-border: #1f2937;
+  /* Calming matte deep Nordic night (avoids eye fatigue and glare) */
+  --background: #0f1722;
+  --foreground: #f1f5f9;
+  --card-bg: #16202c;
+  --card-border: #233142;
 }
 
 body {
@@ -51,7 +53,7 @@ body {
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #2b394b;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -59,5 +61,5 @@ body {
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #3e5066;
 }

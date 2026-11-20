@@ -6,7 +6,6 @@ import { TOOLS, TOOL_CATEGORIES, getToolsByCategory } from "@/lib/tools-registry
 import DynamicIcon from "@/components/DynamicIcon";
 import {
   Search,
-  ShieldCheck,
   Zap,
   Lock,
   Sparkles,
@@ -61,19 +60,14 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="space-y-24 pb-20">
+    <div className="space-y-16 pb-16">
       {/* 1. Hero Section */}
-      <section className="relative pt-12 pb-6 sm:pt-20 sm:pb-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center space-y-8">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
-          <ShieldCheck className="w-4 h-4 text-emerald-500" />
-          <span>Zero Server Storage • 100% Private In-Browser Utility</span>
-        </div>
-
-        <div className="space-y-4 max-w-4xl mx-auto">
-          <h1 className="text-4xl sm:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.15]">
+      <section className="relative pt-6 pb-4 sm:pt-8 sm:pb-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center space-y-6">
+        <div className="space-y-3 max-w-4xl mx-auto">
+          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.15]">
             Online PDF, Image &amp; File Processing Platform
           </h1>
-          <p className="text-base sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
             Fast, lightweight, and private. Merge, compress, convert, split, and edit files directly in your browser without software installations or cloud uploads.
           </p>
         </div>
