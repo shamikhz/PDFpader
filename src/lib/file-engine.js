@@ -76,6 +76,7 @@ export async function calculateFileHashes(file, onProgress = () => {}) {
 
   for (let i = 0; i < algorithms.length; i++) {
     const algo = algorithms[i];
+    await new Promise((r) => setTimeout(r, 0));
     const hashBuffer = await crypto.subtle.digest(algo, buffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     hashes[algo] = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");

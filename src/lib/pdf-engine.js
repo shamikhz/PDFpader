@@ -37,6 +37,7 @@ export async function mergePdf(files, onProgress = () => {}) {
 
   for (let i = 0; i < total; i++) {
     onProgress(Math.round(((i + 1) / total) * 100));
+    await new Promise((r) => setTimeout(r, 0));
     const fileBytes = await files[i].arrayBuffer();
     const doc = await PDFDocument.load(fileBytes, { ignoreEncryption: true });
     const copiedPages = await mergedPdf.copyPages(doc, doc.getPageIndices());
@@ -59,6 +60,7 @@ export async function splitPdf(file, mode = "range", rangeStr = "1", onProgress 
     const results = [];
     for (let i = 0; i < totalPages; i++) {
       onProgress(Math.round(((i + 1) / totalPages) * 100));
+      await new Promise((r) => setTimeout(r, 0));
       const singleDoc = await PDFDocument.create();
       const [page] = await singleDoc.copyPages(doc, [i]);
       singleDoc.addPage(page);
@@ -380,6 +382,7 @@ export async function imagesToPdf(imageFiles, onProgress = () => {}) {
   const total = imageFiles.length;
 
   for (let i = 0; i < total; i++) {
+    await new Promise((r) => setTimeout(r, 0));
     const imgFile = imageFiles[i];
     const imgBytes = await imgFile.arrayBuffer();
     let embeddedImg;

@@ -4,40 +4,10 @@ import React, { useState, useEffect, useRef } from "react";
 import FileDropzone from "./FileDropzone";
 import DynamicIcon from "./DynamicIcon";
 import { formatBytes, sanitizeFilename, revokeUrl } from "@/lib/utils";
-import {
-  mergePdf,
-  splitPdf,
-  rotatePdf,
-  deletePdfPages,
-  extractPdfPages,
-  organizePdf,
-  addWatermark,
-  addPageNumbers,
-  protectPdf,
-  unlockPdf,
-  getPdfMetadata,
-  updatePdfMetadata,
-  convertPdfPageSize,
-  imagesToPdf,
-  countPdfPages,
-} from "@/lib/pdf-engine";
-import {
-  compressImage,
-  resizeImage,
-  convertImage,
-  cropImage,
-  rotateAndFlipImage,
-  calculatePrintDimensions,
-  getImageMetadata,
-} from "@/lib/image-engine";
-import {
-  createZip,
-  extractZip,
-  calculateFileHashes,
-  compareTextFiles,
-  analyzeFiles,
-  batchRenameFiles,
-} from "@/lib/file-engine";
+// Lazy dynamic engine loaders for code splitting & zero initial page footprint
+const getPdfEngine = () => import("@/lib/pdf-engine");
+const getImageEngine = () => import("@/lib/image-engine");
+const getFileEngine = () => import("@/lib/file-engine");
 import {
   Download,
   RotateCcw,
@@ -154,11 +124,20 @@ export default function ToolView({ tool }) {
     try {
       const slug = tool.slug;
 
+      // Lazy dynamic engine instances
+      let _pdf = null;
+      let _img = null;
+      let _file = null;
+      const getPdf = async () => (_pdf ||= await getPdfEngine());
+      const getImg = async () => (_img ||= await getImageEngine());
+      const getFile = async () => (_file ||= await getFileEngine());
+
       // --- PDF TOOLS ---
       if (slug === "merge-pdf") {
         if (files.length < 2) {
           throw new Error("Please upload at least 2 PDF files to merge.");
         }
+        const { mergePdf } = await getPdf();
         const bytes = await mergePdf(files, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
         const url = registerUrl(URL.createObjectURL(blob));
@@ -171,8 +150,10 @@ export default function ToolView({ tool }) {
           message: `Successfully merged ${files.length} PDF documents into one unified file.`,
         });
       } else if (slug === "split-pdf") {
+        const { splitPdf } = await getPdf();
         const splitRes = await splitPdf(files[0], splitMode, pdfRange, setProgress);
         if (Array.isArray(splitRes)) {
+          const { createZip } = await getFile();
           const zip = await createZip(
             splitRes.map((r) => new File([r.bytes], r.name, { type: "application/pdf" })),
             "split_pages.zip"
@@ -199,6 +180,7 @@ export default function ToolView({ tool }) {
           });
         }
       } else if (slug === "rotate-pdf") {
+        const { rotatePdf } = await getPdf();
         const bytes = await rotatePdf(
           files[0],
           Number(rotationAngle),
@@ -217,6 +199,7 @@ export default function ToolView({ tool }) {
           message: `Rotated pages by ${rotationAngle}° successfully.`,
         });
       } else if (slug === "delete-pdf-pages") {
+        const { deletePdfPages } = await getPdf();
         const bytes = await deletePdfPages(files[0], deletePagesInput, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
         const url = registerUrl(URL.createObjectURL(blob));
@@ -229,6 +212,7 @@ export default function ToolView({ tool }) {
           message: `Removed pages (${deletePagesInput}) successfully.`,
         });
       } else if (slug === "extract-pdf-pages") {
+        const { extractPdfPages } = await getPdf();
         const bytes = await extractPdfPages(files[0], extractPagesInput, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
         const url = registerUrl(URL.createObjectURL(blob));
@@ -241,6 +225,7 @@ export default function ToolView({ tool }) {
           message: `Extracted pages (${extractPagesInput}) into new PDF.`,
         });
       } else if (slug === "organize-pdf") {
+        const { organizePdf } = await getPdf();
         const bytes = await organizePdf(files[0], organizeOrderInput, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
         const url = registerUrl(URL.createObjectURL(blob));
@@ -253,6 +238,7 @@ export default function ToolView({ tool }) {
           message: "Pages reorganized according to custom sequence.",
         });
       } else if (slug === "add-watermark") {
+        const { addWatermark } = await getPdf();
         const bytes = await addWatermark(
           files[0],
           watermarkText,
@@ -273,6 +259,7 @@ export default function ToolView({ tool }) {
           message: `Watermark "${watermarkText}" stamped on all pages.`,
         });
       } else if (slug === "add-page-numbers") {
+        const { addPageNumbers } = await getPdf();
         const bytes = await addPageNumbers(
           files[0],
           {
@@ -292,6 +279,7 @@ export default function ToolView({ tool }) {
           message: "Page numbers inserted into document margins.",
         });
       } else if (slug === "protect-pdf") {
+        const { protectPdf } = await getPdf();
         const bytes = await protectPdf(files[0], pdfPassword, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
         const url = registerUrl(URL.createObjectURL(blob));
@@ -304,6 +292,7 @@ export default function ToolView({ tool }) {
           message: "PDF encrypted with secure password protection.",
         });
       } else if (slug === "unlock-pdf") {
+        const { unlockPdf } = await getPdf();
         const bytes = await unlockPdf(files[0], pdfPassword, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
         const url = registerUrl(URL.createObjectURL(blob));
@@ -316,6 +305,7 @@ export default function ToolView({ tool }) {
           message: "Password restrictions removed. PDF is now unlocked.",
         });
       } else if (slug === "pdf-metadata") {
+        const { updatePdfMetadata } = await getPdf();
         const bytes = await updatePdfMetadata(files[0], pdfMeta, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
         const url = registerUrl(URL.createObjectURL(blob));
@@ -328,6 +318,7 @@ export default function ToolView({ tool }) {
           message: "PDF metadata updated successfully.",
         });
       } else if (slug === "pdf-page-size") {
+        const { convertPdfPageSize } = await getPdf();
         const bytes = await convertPdfPageSize(files[0], pdfPageSize, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
         const url = registerUrl(URL.createObjectURL(blob));
@@ -340,6 +331,7 @@ export default function ToolView({ tool }) {
           message: `Document page dimensions standardized to ${pdfPageSize}.`,
         });
       } else if (slug === "jpg-to-pdf" || slug === "png-to-pdf" || slug === "image-to-pdf") {
+        const { imagesToPdf } = await getPdf();
         const bytes = await imagesToPdf(files, setProgress);
         const blob = new Blob([bytes], { type: "application/pdf" });
         const url = registerUrl(URL.createObjectURL(blob));
@@ -355,6 +347,7 @@ export default function ToolView({ tool }) {
 
       // --- IMAGE TOOLS ---
       else if (slug === "compress-image") {
+        const { compressImage } = await getImg();
         const comp = await compressImage(files[0], imageQuality / 100, setProgress);
         const url = registerUrl(comp.url);
         setResult({
@@ -365,6 +358,7 @@ export default function ToolView({ tool }) {
           previewUrl: url,
         });
       } else if (slug === "resize-image") {
+        const { resizeImage } = await getImg();
         const resized = await resizeImage(
           files[0],
           {
@@ -386,6 +380,7 @@ export default function ToolView({ tool }) {
         });
       } else if (slug === "convert-image") {
         const ext = convertFormat === "image/webp" ? ".webp" : convertFormat === "image/jpeg" ? ".jpg" : ".png";
+        const { convertImage } = await getImg();
         const converted = await convertImage(files[0], convertFormat, 0.9, setProgress);
         const base = files[0].name.replace(/\.[^/.]+$/, "");
         const url = registerUrl(converted.url);
@@ -399,6 +394,7 @@ export default function ToolView({ tool }) {
           message: `Image converted to ${convertFormat.replace("image/", "").toUpperCase()}.`,
         });
       } else if (slug === "crop-image") {
+        const { cropImage } = await getImg();
         const cropped = await cropImage(
           files[0],
           { x: 0, y: 0, width: parseInt(cropWidth, 10), height: parseInt(cropHeight, 10) },
@@ -415,6 +411,7 @@ export default function ToolView({ tool }) {
           message: `Image cropped to ${cropped.width} × ${cropped.height} px.`,
         });
       } else if (slug === "rotate-image") {
+        const { rotateAndFlipImage } = await getImg();
         const rot = await rotateAndFlipImage(files[0], Number(rotationAngle), false, false, setProgress);
         const url = registerUrl(rot.url);
         setResult({
@@ -427,6 +424,7 @@ export default function ToolView({ tool }) {
           message: `Image rotated by ${rotationAngle}°.`,
         });
       } else if (slug === "image-dpi-calculator") {
+        const { getImageMetadata, calculatePrintDimensions } = await getImg();
         const meta = await getImageMetadata(files[0]);
         const calc = calculatePrintDimensions(meta.width, meta.height, Number(imageDpi));
         setProgress(100);
@@ -436,6 +434,7 @@ export default function ToolView({ tool }) {
           calc,
         });
       } else if (slug === "image-metadata") {
+        const { getImageMetadata } = await getImg();
         const meta = await getImageMetadata(files[0]);
         setProgress(100);
         setResult({
@@ -446,6 +445,7 @@ export default function ToolView({ tool }) {
 
       // --- FILE PROCESSING TOOLS ---
       else if (slug === "create-zip") {
+        const { createZip } = await getFile();
         const zip = await createZip(files, zipName, setProgress);
         const url = registerUrl(zip.url);
         setResult({
@@ -457,6 +457,7 @@ export default function ToolView({ tool }) {
           message: `Packaged ${files.length} file(s) into ZIP archive.`,
         });
       } else if (slug === "extract-zip") {
+        const { extractZip } = await getFile();
         const entries = await extractZip(files[0], setProgress);
         entries.forEach((e) => registerUrl(e.url));
         setResult({
@@ -465,6 +466,7 @@ export default function ToolView({ tool }) {
           zipFileName: files[0].name,
         });
       } else if (slug === "file-hash-generator") {
+        const { calculateFileHashes } = await getFile();
         const hashData = await calculateFileHashes(files[0], setProgress);
         setResult({
           type: "hashes",
@@ -474,6 +476,7 @@ export default function ToolView({ tool }) {
         if (files.length < 2) {
           throw new Error("Please upload 2 text or code files to compare.");
         }
+        const { compareTextFiles } = await getFile();
         const diff = await compareTextFiles(files[0], files[1]);
         setProgress(100);
         setResult({
@@ -481,6 +484,7 @@ export default function ToolView({ tool }) {
           diff,
         });
       } else if (slug === "file-size-analyzer") {
+        const { analyzeFiles } = await getFile();
         const analysis = analyzeFiles(files);
         setProgress(100);
         setResult({
@@ -488,6 +492,7 @@ export default function ToolView({ tool }) {
           analysis,
         });
       } else if (slug === "batch-file-renaming") {
+        const { batchRenameFiles } = await getFile();
         const renamed = await batchRenameFiles(
           files,
           {
@@ -510,6 +515,7 @@ export default function ToolView({ tool }) {
           details: renamed.renamedList,
         });
       } else if (slug === "document-page-counter") {
+        const { countPdfPages } = await getPdf();
         const counts = [];
         let total = 0;
         for (let i = 0; i < files.length; i++) {
@@ -543,6 +549,9 @@ export default function ToolView({ tool }) {
           maxSizeMB={tool.maxSizeMB}
           files={files}
           onFilesChange={(newFiles) => {
+            // Revoke any previous blob URLs to prevent memory leaks
+            createdUrls.current.forEach((url) => revokeUrl(url));
+            createdUrls.current = [];
             setFiles(newFiles);
             setResult(null);
             setError("");

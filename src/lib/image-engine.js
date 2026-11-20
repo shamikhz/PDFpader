@@ -1,5 +1,11 @@
 /**
+ * High-Performance Client-Side Image Processing Engine
+ * Features GPU canvas memory management, chunked operations, and object URL cleanup.
+ */
+
+/**
  * Loads a File or Blob into an HTMLImageElement for Canvas rendering.
+ * Automatically cleans up the object URL and detached DOM nodes on load/error.
  */
 export function loadImage(file) {
   return new Promise((resolve, reject) => {
@@ -18,9 +24,19 @@ export function loadImage(file) {
 }
 
 /**
+ * Helper to deallocate HTMLCanvasElement GPU backing buffer immediately.
+ */
+function cleanupCanvas(canvas) {
+  if (canvas) {
+    canvas.width = 0;
+    canvas.height = 0;
+  }
+}
+
+/**
  * Compresses an image with a specified quality level (0.01 to 1.0).
  */
-export async function compressImage(file, quality = 0.75, onProgress = () => {}) {
+export async function compressImage(file, quality = 0.75, onProgress = () => { }) {
   onProgress(20);
   const img = await loadImage(file);
   onProgress(50);
@@ -33,12 +49,12 @@ export async function compressImage(file, quality = 0.75, onProgress = () => {})
   ctx.drawImage(img, 0, 0);
 
   onProgress(80);
-  // Default to webp or jpeg for lossy compression
   const targetType = file.type === "image/png" ? "image/webp" : file.type || "image/jpeg";
 
   return new Promise((resolve) => {
     canvas.toBlob(
       (blob) => {
+        cleanupCanvas(canvas);
         onProgress(100);
         resolve({
           blob,
@@ -59,7 +75,7 @@ export async function compressImage(file, quality = 0.75, onProgress = () => {})
 /**
  * Resizes an image by explicit dimensions or percentage.
  */
-export async function resizeImage(file, { width, height, maintainAspect = true }, onProgress = () => {}) {
+export async function resizeImage(file, { width, height, maintainAspect = true }, onProgress = () => { }) {
   onProgress(20);
   const img = await loadImage(file);
   onProgress(50);
@@ -88,6 +104,7 @@ export async function resizeImage(file, { width, height, maintainAspect = true }
   onProgress(80);
   return new Promise((resolve) => {
     canvas.toBlob((blob) => {
+      cleanupCanvas(canvas);
       onProgress(100);
       resolve({
         blob,
@@ -102,7 +119,7 @@ export async function resizeImage(file, { width, height, maintainAspect = true }
 /**
  * Converts image to target format: image/png, image/jpeg, image/webp.
  */
-export async function convertImage(file, targetMimeType = "image/webp", quality = 0.9, onProgress = () => {}) {
+export async function convertImage(file, targetMimeType = "image/webp", quality = 0.9, onProgress = () => { }) {
   onProgress(20);
   const img = await loadImage(file);
   onProgress(50);
@@ -112,7 +129,6 @@ export async function convertImage(file, targetMimeType = "image/webp", quality 
   canvas.height = img.naturalHeight;
 
   const ctx = canvas.getContext("2d");
-  // If converting to JPEG, fill with white background first for transparency
   if (targetMimeType === "image/jpeg") {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -123,6 +139,7 @@ export async function convertImage(file, targetMimeType = "image/webp", quality 
   return new Promise((resolve) => {
     canvas.toBlob(
       (blob) => {
+        cleanupCanvas(canvas);
         onProgress(100);
         resolve({
           blob,
@@ -140,7 +157,7 @@ export async function convertImage(file, targetMimeType = "image/webp", quality 
 /**
  * Crops an image to specific coordinates { x, y, width, height }.
  */
-export async function cropImage(file, { x, y, width, height }, onProgress = () => {}) {
+export async function cropImage(file, { x, y, width, height }, onProgress = () => { }) {
   onProgress(20);
   const img = await loadImage(file);
   onProgress(50);
@@ -155,6 +172,7 @@ export async function cropImage(file, { x, y, width, height }, onProgress = () =
   onProgress(80);
   return new Promise((resolve) => {
     canvas.toBlob((blob) => {
+      cleanupCanvas(canvas);
       onProgress(100);
       resolve({
         blob,
@@ -169,7 +187,7 @@ export async function cropImage(file, { x, y, width, height }, onProgress = () =
 /**
  * Rotates and/or flips an image.
  */
-export async function rotateAndFlipImage(file, angle = 90, flipH = false, flipV = false, onProgress = () => {}) {
+export async function rotateAndFlipImage(file, angle = 90, flipH = false, flipV = false, onProgress = () => { }) {
   onProgress(20);
   const img = await loadImage(file);
   onProgress(50);
@@ -188,6 +206,7 @@ export async function rotateAndFlipImage(file, angle = 90, flipH = false, flipV 
   onProgress(80);
   return new Promise((resolve) => {
     canvas.toBlob((blob) => {
+      cleanupCanvas(canvas);
       onProgress(100);
       resolve({
         blob,

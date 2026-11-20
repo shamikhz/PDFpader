@@ -1,7 +1,70 @@
 import React from "react";
-import * as Icons from "lucide-react";
+import {
+  Layers,
+  Scissors,
+  RotateCw,
+  Trash2,
+  FileOutput,
+  ArrowUpDown,
+  Stamp,
+  Hash,
+  Lock,
+  Unlock,
+  FileText,
+  Maximize2,
+  FileImage,
+  Minimize2,
+  Scaling,
+  RefreshCw,
+  Crop,
+  RotateCcw,
+  Images,
+  Calculator,
+  Info,
+  Archive,
+  FolderArchive,
+  Fingerprint,
+  GitCompare,
+  PieChart,
+  Tag,
+  BookOpen,
+  File,
+} from "lucide-react";
+
+// Explicit icon dictionary allows bundlers to tree-shake all 1,400+ unused Lucide icons
+const ICON_REGISTRY = {
+  Layers,
+  Scissors,
+  RotateCw,
+  Trash2,
+  FileOutput,
+  ArrowUpDown,
+  Stamp,
+  Hash,
+  Lock,
+  Unlock,
+  FileText,
+  Maximize2,
+  FileImage,
+  Minimize2,
+  Scaling,
+  RefreshCw,
+  Crop,
+  RotateCcw,
+  Images,
+  Calculator,
+  Info,
+  Archive,
+  FolderArchive,
+  Fingerprint,
+  GitCompare,
+  PieChart,
+  Tag,
+  BookOpen,
+  File,
+};
 
 export default function DynamicIcon({ name, className = "w-6 h-6", ...props }) {
-  const IconComponent = Icons[name] || Icons.File;
+  const IconComponent = ICON_REGISTRY[name] || File;
   return <IconComponent className={className} {...props} />;
 }
