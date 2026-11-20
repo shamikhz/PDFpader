@@ -17,7 +17,7 @@ export default function PrivacyPage() {
       </div>
 
       <header className="space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 text-brand-700 dark:text-brand-300 text-xs font-semibold">
           <ShieldCheck className="w-4 h-4" />
           <span>Zero Server Uploads</span>
         </div>
@@ -32,7 +32,7 @@ export default function PrivacyPage() {
       <div className="prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 space-y-6 text-sm sm:text-base leading-relaxed">
         <section className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Lock className="w-5 h-5 text-emerald-500" />
+            <Lock className="w-5 h-5 text-brand-600 dark:text-brand-400" />
             <span>The Core Guarantee: Your Files Never Leave Your Device</span>
           </h2>
           <p>
@@ -40,15 +40,15 @@ export default function PrivacyPage() {
           </p>
           <ul className="space-y-2 pt-2 text-sm">
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0 mt-0.5" />
               <span>We do NOT upload your files to any remote server or third-party cloud.</span>
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0 mt-0.5" />
               <span>We do NOT store, log, read, or retain your documents, images, or metadata.</span>
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0 mt-0.5" />
               <span>No user registration or account creation is required to use any tool.</span>
             </li>
           </ul>

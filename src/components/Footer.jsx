@@ -15,7 +15,7 @@ export default function Footer() {
           {/* Brand & Privacy Column */}
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-500 flex items-center justify-center text-white shadow-md">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 via-orange-500 to-amber-500 flex items-center justify-center text-white shadow-md">
                 <FileCheck2 className="w-5 h-5" />
               </div>
               <span className="font-black text-2xl tracking-tight text-white">
@@ -25,8 +25,8 @@ export default function Footer() {
             <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
               Fast, privacy-first, in-browser file utility suite. Process PDFs, optimize images, generate hashes, and bundle archives with 100% client-side execution.
             </p>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-800 text-xs text-emerald-300 font-medium">
-              <Lock className="w-4 h-4 text-emerald-400 shrink-0" />
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brand-950/60 border border-brand-800/80 text-xs text-brand-200 font-medium">
+              <Lock className="w-4 h-4 text-brand-400 shrink-0" />
               <span>Zero server storage • Files never leave your device</span>
             </div>
           </div>

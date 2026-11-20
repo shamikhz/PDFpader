@@ -97,14 +97,14 @@ export default function Navbar() {
             onClick={() => setActiveDropdown(null)}
             className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-lg"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-700 to-teal-500 flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 via-orange-500 to-amber-500 flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
               <FileCheck2 className="w-5 h-5" />
             </div>
             <div className="flex items-baseline">
               <span className="font-black text-xl tracking-tight text-slate-900 dark:text-white">
                 PDF<span className="text-brand-600 dark:text-brand-400">padar</span>
               </span>
-              <span className="hidden sm:inline-block ml-2 text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="hidden sm:inline-block ml-2 text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-brand-500/10 text-brand-700 dark:text-brand-300 border border-brand-500/20">
                 100% Client-Side
               </span>
             </div>
@@ -476,7 +476,7 @@ export default function Navbar() {
 
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-2.5 text-xs text-slate-700 dark:text-slate-300">
               <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                <ShieldCheck className="w-4 h-4 text-brand-600 dark:text-brand-400" />
                 <span>Current Free Plan Includes:</span>
               </div>
               <ul className="space-y-1.5 pl-6 list-disc">

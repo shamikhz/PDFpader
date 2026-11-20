@@ -1034,41 +1034,41 @@ export default function ToolView({ tool }) {
       {result && (
         <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 animate-in fade-in duration-300 space-y-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
+            <div className="flex items-center gap-2 text-brand-600 dark:text-brand-400 font-bold text-sm">
               <CheckCircle2 className="w-5 h-5" />
               <span>Task Complete!</span>
             </div>
             <button
-              type="button"
-              onClick={handleReset}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Process another file</span>
-            </button>
-          </div>
-
-          {/* Visual In-Browser Preview for Images */}
-          {result.previewUrl && (
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 space-y-2">
-              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                <Eye className="w-3.5 h-3.5" />
-                <span>Visual Result Preview</span>
-              </div>
-              <div className="flex justify-center max-h-72 overflow-hidden rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={result.previewUrl}
-                  alt="Processed preview"
-                  className="max-h-64 object-contain rounded-lg"
-                />
-              </div>
+                type="button"
+                onClick={handleReset}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Process another file</span>
+              </button>
             </div>
-          )}
+
+            {/* Visual In-Browser Preview for Images */}
+            {result.previewUrl && (
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Visual Result Preview</span>
+                </div>
+                <div className="flex justify-center max-h-72 overflow-hidden rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={result.previewUrl}
+                    alt="Processed preview"
+                    className="max-h-64 object-contain rounded-lg"
+                  />
+                </div>
+              </div>
+            )}
 
           {/* Standard Download Box */}
           {result.type === "download" && (
-            <div className="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 space-y-4">
+            <div className="p-6 rounded-2xl bg-brand-50/80 dark:bg-brand-950/30 border border-brand-200/80 dark:border-brand-900/50 space-y-4">
               <div>
                 <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   {result.message}
@@ -1082,7 +1082,7 @@ export default function ToolView({ tool }) {
               <button
                 type="button"
                 onClick={() => triggerDownload(result.url, result.filename)}
-                className="inline-flex items-center gap-2 py-3.5 px-6 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/20 transition-all text-sm"
+                className="inline-flex items-center gap-2 py-3.5 px-6 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-md shadow-brand-600/20 transition-all text-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Download {result.filename}</span>
@@ -1092,7 +1092,7 @@ export default function ToolView({ tool }) {
 
           {/* Image Compression Results with Savings Metrics */}
           {result.type === "compress" && (
-            <div className="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 space-y-5">
+            <div className="p-6 rounded-2xl bg-brand-50/80 dark:bg-brand-950/30 border border-brand-200/80 dark:border-brand-900/50 space-y-5">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
                   <span className="text-xs font-medium text-slate-400 block">Original</span>
@@ -1102,13 +1102,13 @@ export default function ToolView({ tool }) {
                 </div>
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
                   <span className="text-xs font-medium text-slate-400 block">Compressed</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                  <span className="font-bold text-brand-600 dark:text-brand-400 text-sm">
                     {formatBytes(result.compressedSize)}
                   </span>
                 </div>
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
                   <span className="text-xs font-medium text-slate-400 block">Saved</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                  <span className="font-bold text-brand-600 dark:text-brand-400 text-sm">
                     {result.savedPercentage}%
                   </span>
                 </div>
@@ -1122,7 +1122,7 @@ export default function ToolView({ tool }) {
               <button
                 type="button"
                 onClick={() => triggerDownload(result.url, result.filename)}
-                className="inline-flex items-center gap-2 py-3.5 px-6 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition-all text-sm"
+                className="inline-flex items-center gap-2 py-3.5 px-6 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-md transition-all text-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Download Compressed Image</span>
@@ -1131,224 +1131,223 @@ export default function ToolView({ tool }) {
           )}
 
           {/* Cryptographic Hashes Output */}
-          {result.type === "hashes" && (
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Calculated Fingerprints for &quot;{result.hashData.fileName}&quot;
-              </h4>
-              <div className="space-y-2">
-                {Object.entries(result.hashData.hashes).map(([algo, hash]) => (
-                  <div
-                    key={algo}
-                    className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-                  >
-                    <div>
-                      <span className="text-xs font-bold text-brand-600 dark:text-brand-400 block">
-                        {algo}
-                      </span>
-                      <span className="font-mono text-xs text-slate-700 dark:text-slate-300 break-all select-all">
-                        {hash}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(hash, algo)}
-                      className="self-end sm:self-center p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 text-slate-600 dark:text-slate-200 text-xs flex items-center gap-1 shrink-0"
-                    >
-                      {copiedKey === algo ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-emerald-500" />
-                          <span>Copied</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5" />
-                          <span>Copy</span>
-                        </>
-                      )}
-                    </button>
+                    {result.type === "hashes" && (
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                          Calculated Fingerprints for &quot;{result.hashData.fileName}&quot;
+                        </h4>
+                        <div className="space-y-2">
+                          {Object.entries(result.hashData.hashes).map(([algo, hash]) => (
+                            <div
+                              key={algo}
+                              className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                            >
+                              <div>
+                                <span className="text-xs font-bold text-brand-600 dark:text-brand-400 block">
+                                  {algo}
+                                </span>
+                                <span className="font-mono text-xs text-slate-700 dark:text-slate-300 break-all select-all">
+                                  {hash}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(hash, algo)}
+                                className="self-end sm:self-center p-2 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 text-slate-600 dark:text-slate-200 text-xs flex items-center gap-1 shrink-0"
+                              >
+                                {copiedKey === algo ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
+                                    <span>Copied</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3.5 h-3.5" />
+                                    <span>Copy</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Extracted ZIP Entries */}
+                    {result.type === "zip-entries" && (
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                          Extracted Files from &quot;{result.zipFileName}&quot; ({result.entries.length})
+                        </h4>
+                        <div className="space-y-2 max-h-72 overflow-y-auto">
+                          {result.entries.map((entry, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-sm"
+                            >
+                              <div className="truncate mr-2">
+                                <span className="font-semibold text-xs sm:text-sm text-slate-800 dark:text-slate-200 block truncate">
+                                  {entry.name}
+                                </span>
+                                <span className="text-xs text-slate-400">
+                                  {formatBytes(entry.size)}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => triggerDownload(entry.url, entry.name)}
+                                className="p-2 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 shrink-0"
+                                title="Download file"
+                              >
+                                <Download className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* File Comparison Diff Output */}
+                    {result.type === "diff" && (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500">
+                          <span>Side-by-Side Diff Report</span>
+                          <span className={result.diff.identical ? "text-brand-600 dark:text-brand-400 font-semibold" : "text-amber-600 font-semibold"}>
+                            {result.diff.identical ? "Files are Identical" : `${result.diff.differencesCount} line difference(s) detected`}
+                          </span>
+                        </div>
+                        <div className="max-h-80 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 font-mono text-xs divide-y divide-slate-100 dark:divide-slate-800">
+                          {result.diff.diffLines.map((line, idx) => (
+                            <div
+                              key={idx}
+                              className={`grid grid-cols-2 p-2 gap-2 ${line.type === "diff"
+                                ? "bg-amber-500/10 text-amber-900 dark:text-amber-200"
+                                : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400"
+                                }`}
+                            >
+                              <div className="truncate">
+                                <span className="text-slate-400 mr-2">{line.lineNum}</span>
+                                <span>{line.left ?? "—"}</span>
+                              </div>
+                              <div className="truncate border-l border-slate-200 dark:border-slate-700 pl-2">
+                                <span className="text-slate-400 mr-2">{line.lineNum}</span>
+                                <span>{line.right ?? "—"}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* File Storage Analysis */}
+                    {result.type === "file-analysis" && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-3 gap-3 text-center">
+                          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                            <span className="text-xs text-slate-400 block">Total Files</span>
+                            <span className="font-bold text-slate-800 dark:text-white text-sm">
+                              {result.analysis.totalFiles}
+                            </span>
+                          </div>
+                          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                            <span className="text-xs text-slate-400 block">Total Storage</span>
+                            <span className="font-bold text-brand-600 dark:text-brand-400 text-sm">
+                              {result.analysis.totalFormattedSize}
+                            </span>
+                          </div>
+                          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                            <span className="text-xs text-slate-400 block">Average File</span>
+                            <span className="font-bold text-slate-800 dark:text-white text-sm">
+                              {result.analysis.averageSize}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-xs">
+                            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase">
+                              <tr>
+                                <th className="p-2.5 rounded-l-lg">File Name</th>
+                                <th className="p-2.5">Size</th>
+                                <th className="p-2.5">Share</th>
+                                <th className="p-2.5 rounded-r-lg">Type</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                              {result.analysis.fileStats.map((f, i) => (
+                                <tr key={i}>
+                                  <td className="p-2.5 font-medium truncate max-w-xs">{f.name}</td>
+                                  <td className="p-2.5">{f.formattedSize}</td>
+                                  <td className="p-2.5 font-semibold text-brand-500">{f.percentageOfTotal}</td>
+                                  <td className="p-2.5 text-slate-400">{f.type}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Image DPI Calculations */}
+                    {result.type === "dpi-calc" && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                            <span className="text-xs text-slate-400 block">Pixels</span>
+                            <span className="font-bold text-slate-800 dark:text-white text-xs sm:text-sm">
+                              {result.meta.width} × {result.meta.height}
+                            </span>
+                          </div>
+                          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                            <span className="text-xs text-slate-400 block">Print (Inches)</span>
+                            <span className="font-bold text-brand-600 dark:text-brand-400 text-xs sm:text-sm">
+                              {result.calc.inches}
+                            </span>
+                          </div>
+                          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                            <span className="text-xs text-slate-400 block">Print (Centimeters)</span>
+                            <span className="font-bold text-brand-600 dark:text-brand-400 text-xs sm:text-sm">
+                              {result.calc.cm}
+                            </span>
+                          </div>
+                          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                            <span className="text-xs text-slate-400 block">Print Rating</span>
+                            <span className="font-bold text-brand-600 dark:text-brand-400 text-xs sm:text-sm">
+                              {result.calc.printQuality}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Document Page Counts */}
+                    {result.type === "page-count" && (
+                      <div className="space-y-4">
+                        <div className="p-4 bg-brand-50 dark:bg-brand-950/30 border border-brand-200 dark:border-brand-900/40 rounded-2xl flex items-center justify-between">
+                          <span className="text-sm font-semibold text-brand-900 dark:text-brand-200">
+                            Total Aggregate Page Count:
+                          </span>
+                          <span className="text-2xl font-black text-brand-600 dark:text-brand-400">
+                            {result.total} Pages
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          {result.counts.map((doc, i) => (
+                            <div
+                              key={i}
+                              className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm"
+                            >
+                              <span className="font-medium truncate mr-2">{doc.name}</span>
+                              <span className="font-bold text-slate-700 dark:text-slate-300">
+                                {doc.pages} pages
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ))}
+                )}
               </div>
-            </div>
-          )}
-
-          {/* Extracted ZIP Entries */}
-          {result.type === "zip-entries" && (
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Extracted Files from &quot;{result.zipFileName}&quot; ({result.entries.length})
-              </h4>
-              <div className="space-y-2 max-h-72 overflow-y-auto">
-                {result.entries.map((entry, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-sm"
-                  >
-                    <div className="truncate mr-2">
-                      <span className="font-semibold text-xs sm:text-sm text-slate-800 dark:text-slate-200 block truncate">
-                        {entry.name}
-                      </span>
-                      <span className="text-xs text-slate-400">
-                        {formatBytes(entry.size)}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => triggerDownload(entry.url, entry.name)}
-                      className="p-2 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 shrink-0"
-                      title="Download file"
-                    >
-                      <Download className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* File Comparison Diff Output */}
-          {result.type === "diff" && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500">
-                <span>Side-by-Side Diff Report</span>
-                <span className={result.diff.identical ? "text-emerald-500" : "text-amber-500"}>
-                  {result.diff.identical ? "Files are Identical" : `${result.diff.differencesCount} line difference(s) detected`}
-                </span>
-              </div>
-              <div className="max-h-80 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 font-mono text-xs divide-y divide-slate-100 dark:divide-slate-800">
-                {result.diff.diffLines.map((line, idx) => (
-                  <div
-                    key={idx}
-                    className={`grid grid-cols-2 p-2 gap-2 ${
-                      line.type === "diff"
-                        ? "bg-amber-500/10 text-amber-900 dark:text-amber-200"
-                        : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400"
-                    }`}
-                  >
-                    <div className="truncate">
-                      <span className="text-slate-400 mr-2">{line.lineNum}</span>
-                      <span>{line.left ?? "—"}</span>
-                    </div>
-                    <div className="truncate border-l border-slate-200 dark:border-slate-700 pl-2">
-                      <span className="text-slate-400 mr-2">{line.lineNum}</span>
-                      <span>{line.right ?? "—"}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* File Storage Analysis */}
-          {result.type === "file-analysis" && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Total Files</span>
-                  <span className="font-bold text-slate-800 dark:text-white text-sm">
-                    {result.analysis.totalFiles}
-                  </span>
-                </div>
-                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Total Storage</span>
-                  <span className="font-bold text-brand-600 dark:text-brand-400 text-sm">
-                    {result.analysis.totalFormattedSize}
-                  </span>
-                </div>
-                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Average File</span>
-                  <span className="font-bold text-slate-800 dark:text-white text-sm">
-                    {result.analysis.averageSize}
-                  </span>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase">
-                    <tr>
-                      <th className="p-2.5 rounded-l-lg">File Name</th>
-                      <th className="p-2.5">Size</th>
-                      <th className="p-2.5">Share</th>
-                      <th className="p-2.5 rounded-r-lg">Type</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {result.analysis.fileStats.map((f, i) => (
-                      <tr key={i}>
-                        <td className="p-2.5 font-medium truncate max-w-xs">{f.name}</td>
-                        <td className="p-2.5">{f.formattedSize}</td>
-                        <td className="p-2.5 font-semibold text-brand-500">{f.percentageOfTotal}</td>
-                        <td className="p-2.5 text-slate-400">{f.type}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Image DPI Calculations */}
-          {result.type === "dpi-calc" && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Pixels</span>
-                  <span className="font-bold text-slate-800 dark:text-white text-xs sm:text-sm">
-                    {result.meta.width} × {result.meta.height}
-                  </span>
-                </div>
-                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Print (Inches)</span>
-                  <span className="font-bold text-brand-600 dark:text-brand-400 text-xs sm:text-sm">
-                    {result.calc.inches}
-                  </span>
-                </div>
-                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Print (Centimeters)</span>
-                  <span className="font-bold text-brand-600 dark:text-brand-400 text-xs sm:text-sm">
-                    {result.calc.cm}
-                  </span>
-                </div>
-                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <span className="text-xs text-slate-400 block">Print Rating</span>
-                  <span className="font-bold text-emerald-500 text-xs sm:text-sm">
-                    {result.calc.printQuality}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Document Page Counts */}
-          {result.type === "page-count" && (
-            <div className="space-y-4">
-              <div className="p-4 bg-brand-50 dark:bg-brand-950/30 border border-brand-200 dark:border-brand-900/40 rounded-2xl flex items-center justify-between">
-                <span className="text-sm font-semibold text-brand-900 dark:text-brand-200">
-                  Total Aggregate Page Count:
-                </span>
-                <span className="text-2xl font-black text-brand-600 dark:text-brand-400">
-                  {result.total} Pages
-                </span>
-              </div>
-              <div className="space-y-2">
-                {result.counts.map((doc, i) => (
-                  <div
-                    key={i}
-                    className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm"
-                  >
-                    <span className="font-medium truncate mr-2">{doc.name}</span>
-                    <span className="font-bold text-slate-700 dark:text-slate-300">
-                      {doc.pages} pages
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+            );
 }

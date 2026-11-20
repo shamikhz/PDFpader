@@ -14,19 +14,19 @@ html {
 }
 
 :root {
-  /* Soothing, low-strain warm-paper background & crisp high-contrast text */
-  --background: #f7f9fa;
-  --foreground: #141d26;
-  --card-bg: #ffffff;
-  --card-border: #e2e8f0;
+  /* Soothing light-orange & warm apricot paper background (replaces cold white & green) */
+  --background: #fcf0e2;
+  --foreground: #22140a;
+  --card-bg: #fff9f2;
+  --card-border: #edd2b7;
 }
 
 .dark {
-  /* Calming matte deep Nordic night (avoids eye fatigue and glare) */
-  --background: #0f1722;
-  --foreground: #f1f5f9;
-  --card-bg: #16202c;
-  --card-border: #233142;
+  /* Calming warm espresso night surface */
+  --background: #100804;
+  --foreground: #fdf2e6;
+  --card-bg: #1c1008;
+  --card-border: #382416;
 }
 
 body {
@@ -37,7 +37,7 @@ body {
   line-height: 1.6;
 }
 
-/* Custom scrollbars */
+/* Custom scrollbars with warm amber-apricot tones */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -48,18 +48,18 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #dfbe9e;
   border-radius: 4px;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #2b394b;
+  background: #382416;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #c9a37e;
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #3e5066;
+  background: #4e3321;
 }

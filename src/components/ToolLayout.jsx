@@ -24,8 +24,8 @@ export default function ToolLayout({ tool, relatedTools = [] }) {
     tool.category === "pdf"
       ? "PDF Tools"
       : tool.category === "image"
-      ? "Image Tools"
-      : "File Utilities";
+        ? "Image Tools"
+        : "File Utilities";
 
   const breadcrumbs = [
     { label: categoryName, href: `/#${tool.category}-tools` },
@@ -45,7 +45,7 @@ export default function ToolLayout({ tool, relatedTools = [] }) {
           <DynamicIcon name={tool.icon} className="w-3.5 h-3.5 text-brand-500" />
           <span>{categoryName}</span>
           <span>•</span>
-          <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+          <span className="flex items-center gap-1 text-brand-700 dark:text-brand-300">
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>100% Client-Side</span>
           </span>
@@ -67,7 +67,7 @@ export default function ToolLayout({ tool, relatedTools = [] }) {
           <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 font-mono text-xs">
             Max Limit: {tool.maxSizeMB} MB
           </span>
-          <span className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-medium text-xs">
+          <span className="px-2.5 py-1 rounded-lg bg-brand-500/10 text-brand-700 dark:text-brand-300 font-medium text-xs">
             Zero Uploads • Pure Privacy
           </span>
         </div>
@@ -107,7 +107,7 @@ export default function ToolLayout({ tool, relatedTools = [] }) {
           <ul className="space-y-3">
             {tool.features.map((feat, i) => (
               <li key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-                <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                <CheckCircle className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0 mt-0.5" />
                 <span className="leading-relaxed">{feat}</span>
               </li>
             ))}
@@ -144,9 +144,8 @@ export default function ToolLayout({ tool, relatedTools = [] }) {
                   >
                     <span>{faq.q}</span>
                     <ChevronDown
-                      className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${
-                        isOpen ? "rotate-180 text-brand-500" : ""
-                      }`}
+                      className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${isOpen ? "rotate-180 text-brand-500" : ""
+                        }`}
                     />
                   </button>
                   {isOpen && (

@@ -60,9 +60,9 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="space-y-16 pb-16">
-      {/* 1. Hero Section */}
-      <section className="relative pt-6 pb-4 sm:pt-8 sm:pb-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center space-y-6">
+    <div className="space-y-12 pb-16">
+      {/* 1. Hero Section - Tightened spacing, clean without blank space */}
+      <section className="relative pt-2 pb-4 sm:pt-4 sm:pb-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center space-y-5">
         <div className="space-y-3 max-w-4xl mx-auto">
           <h1 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.15]">
             Online PDF, Image &amp; File Processing Platform
@@ -292,7 +292,7 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-950/50 text-brand-700 dark:text-brand-300 flex items-center justify-center">
               <Lock className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-base text-slate-900 dark:text-white">
@@ -316,7 +316,7 @@ export default function HomePage() {
           </div>
 
           <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 flex items-center justify-center">
               <HeartHandshake className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-base text-slate-900 dark:text-white">
