@@ -5,7 +5,6 @@ import Link from "next/link";
 import { TOOLS, TOOL_CATEGORIES, getToolsByCategory } from "@/lib/tools-registry";
 import DynamicIcon from "@/components/DynamicIcon";
 import {
-  Search,
   Zap,
   Lock,
   Sparkles,
@@ -20,7 +19,6 @@ import {
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
   const [openFaq, setOpenFaq] = useState(0);
 
   // Popular tools selection
@@ -31,14 +29,10 @@ export default function HomePage() {
   const imageTools = getToolsByCategory("image");
   const fileTools = getToolsByCategory("file");
 
-  const filteredTools = TOOLS.filter((tool) => {
-    const matchesCategory = selectedCategory === "all" || tool.category === selectedCategory;
-    const matchesSearch =
-      searchQuery.trim() === "" ||
-      tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tool.shortDesc.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filteredTools =
+    selectedCategory === "all"
+      ? TOOLS
+      : TOOLS.filter((tool) => tool.category === selectedCategory);
 
   const globalFaqs = [
     {
@@ -72,31 +66,8 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* 2. Prominent Search Bar */}
-        <div className="max-w-2xl mx-auto relative pt-2">
-          <div className="relative flex items-center">
-            <Search className="w-5 h-5 text-slate-400 absolute left-4 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search 28+ tools (e.g. merge pdf, compress image, zip, hash)..."
-              className="w-full pl-12 pr-16 py-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 shadow-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm sm:text-base transition-all"
-              aria-label="Search tools"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-4 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                Clear
-              </button>
-            )}
-          </div>
-        </div>
-
         {/* Category Filter Tabs */}
-        <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+        <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
           <button
             onClick={() => setSelectedCategory("all")}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
@@ -193,16 +164,13 @@ export default function HomePage() {
         {filteredTools.length === 0 ? (
           <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 space-y-3">
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              No matching tools found for &quot;{searchQuery}&quot;.
+              No tools found in this category.
             </p>
             <button
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedCategory("all");
-              }}
+              onClick={() => setSelectedCategory("all")}
               className="text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline"
             >
-              Reset search filter
+              View All Tools
             </button>
           </div>
         ) : (

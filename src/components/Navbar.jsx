@@ -7,7 +7,6 @@ import { TOOLS, getToolsByCategory } from "@/lib/tools-registry";
 import ThemeToggle from "./ThemeToggle";
 import DynamicIcon from "./DynamicIcon";
 import {
-  Search,
   ShieldCheck,
   Menu,
   X,
@@ -21,42 +20,19 @@ import {
 export default function Navbar() {
   const router = useRouter();
   const [activeDropdown, setActiveDropdown] = useState(null); // 'pdf' | 'image' | 'file' | null
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pricingModalOpen, setPricingModalOpen] = useState(false);
 
-  const searchInputRef = useRef(null);
   const navRef = useRef(null);
 
   const pdfTools = getToolsByCategory("pdf");
   const imageTools = getToolsByCategory("image");
   const fileTools = getToolsByCategory("file");
 
-  const filteredTools = searchQuery.trim()
-    ? TOOLS.filter(
-        (t) =>
-          t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          t.shortDesc.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          t.category.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : [];
-
-  useEffect(() => {
-    if (searchOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [searchOpen]);
-
-  // Handle Ctrl+K / Cmd+K and Escape
+  // Handle Escape
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-        e.preventDefault();
-        setSearchOpen((prev) => !prev);
-      }
       if (e.key === "Escape") {
-        setSearchOpen(false);
         setActiveDropdown(null);
         setPricingModalOpen(false);
       }
@@ -77,9 +53,7 @@ export default function Navbar() {
   }, []);
 
   const handleSelectTool = (slug) => {
-    setSearchOpen(false);
     setActiveDropdown(null);
-    setSearchQuery("");
     setMobileMenuOpen(false);
     router.push(`/tools/${slug}`);
   };
@@ -268,19 +242,6 @@ export default function Navbar() {
 
           {/* Right Action Bar */}
           <div className="flex items-center gap-2.5">
-            {/* Search Trigger Button */}
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
-              aria-label="Search tools (Shortcut: Ctrl + K)"
-            >
-              <Search className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Search 28+ tools</span>
-              <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded font-mono shadow-sm">
-                Ctrl K
-              </kbd>
-            </button>
-
             {/* Dark/Light Mode Switcher */}
             <ThemeToggle />
 
@@ -367,79 +328,6 @@ export default function Navbar() {
           </div>
         )}
       </header>
-
-      {/* Global Quick Search Modal */}
-      {searchOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Search Input Box */}
-            <div className="flex items-center px-4 border-b border-slate-200 dark:border-slate-800">
-              <Search className="w-5 h-5 text-slate-400 shrink-0" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search tools (e.g. merge, compress, split, watermark, hash)..."
-                className="w-full px-3 py-4 bg-transparent text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none text-sm sm:text-base"
-                aria-label="Search tools"
-              />
-              <button
-                onClick={() => setSearchOpen(false)}
-                className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-mono"
-              >
-                ESC
-              </button>
-            </div>
-
-            {/* Results List */}
-            <div className="max-h-80 overflow-y-auto p-2">
-              {searchQuery.trim() === "" ? (
-                <div className="p-4 text-center text-xs text-slate-400">
-                  Type any tool name, keyword, or format to jump directly...
-                </div>
-              ) : filteredTools.length === 0 ? (
-                <div className="p-6 text-center text-sm text-slate-500">
-                  No matching tools found for &quot;{searchQuery}&quot;.
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {filteredTools.map((tool) => (
-                    <button
-                      key={tool.slug}
-                      onClick={() => handleSelectTool(tool.slug)}
-                      className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition-colors group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 border border-brand-200/50 dark:border-brand-800/40">
-                          <DynamicIcon name={tool.icon} className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400">
-                            {tool.name}
-                          </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
-                            {tool.shortDesc}
-                          </div>
-                        </div>
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="fixed inset-0 -z-10" onClick={() => setSearchOpen(false)} />
-        </div>
-      )}
 
       {/* Pricing Modal */}
       {pricingModalOpen && (
