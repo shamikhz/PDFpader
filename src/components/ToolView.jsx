@@ -34,6 +34,14 @@ export default function ToolView({ tool }) {
 
   // Track created blob URLs for memory cleanup
   const createdUrls = useRef([]);
+  const resultRef = useRef(null);
+
+  // Smoothly scroll to result when processing completes
+  useEffect(() => {
+    if (result && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [result]);
 
   // Tool specific options state
   const [pdfRange, setPdfRange] = useState("1-3");
@@ -348,51 +356,164 @@ export default function ToolView({ tool }) {
       // --- IMAGE TOOLS ---
       else if (slug === "compress-image") {
         const { compressImage } = await getImg();
-        const comp = await compressImage(files[0], imageQuality / 100, setProgress);
-        const url = registerUrl(comp.url);
-        setResult({
-          type: "compress",
-          ...comp,
-          url,
-          filename: `compressed_${files[0].name}`,
-          previewUrl: url,
-        });
+        if (files.length === 1) {
+          const comp = await compressImage(files[0], imageQuality / 100, setProgress);
+          const url = registerUrl(comp.url);
+          const targetExt = comp.type === "image/webp" ? ".webp" : comp.type === "image/png" ? ".png" : ".jpg";
+          const baseName = files[0].name.replace(/\.[^/.]+$/, "");
+          const filename = `compressed_${baseName}${targetExt}`;
+          setResult({
+            type: "compress",
+            ...comp,
+            url,
+            filename,
+            previewUrl: url,
+            size: comp.compressedSize,
+            message: `Successfully compressed ${files[0].name} (${comp.savedPercentage}% saved).`,
+          });
+        } else {
+          const { default: JSZip } = await import("jszip");
+          const zip = new JSZip();
+          const items = [];
+          for (let i = 0; i < files.length; i++) {
+            const f = files[i];
+            const comp = await compressImage(f, imageQuality / 100, (p) => {
+              setProgress(Math.round(((i + p / 100) / files.length) * 100));
+            });
+            const targetExt = comp.type === "image/webp" ? ".webp" : comp.type === "image/png" ? ".png" : ".jpg";
+            const baseName = f.name.replace(/\.[^/.]+$/, "");
+            const outName = `compressed_${baseName}${targetExt}`;
+            const itemUrl = registerUrl(comp.url);
+            zip.file(outName, comp.blob);
+            items.push({
+              filename: outName,
+              originalName: f.name,
+              originalSize: f.size,
+              compressedSize: comp.compressedSize,
+              size: comp.compressedSize,
+              savedPercentage: comp.savedPercentage,
+              url: itemUrl,
+              previewUrl: itemUrl,
+            });
+          }
+          const zipBlob = await zip.generateAsync({ type: "blob" });
+          const zipUrl = registerUrl(URL.createObjectURL(zipBlob));
+          setResult({
+            type: "batch-images",
+            items,
+            url: zipUrl,
+            filename: "compressed_images.zip",
+            size: zipBlob.size,
+            message: `Successfully compressed ${files.length} images!`,
+          });
+        }
       } else if (slug === "resize-image") {
         const { resizeImage } = await getImg();
-        const resized = await resizeImage(
-          files[0],
-          {
-            width: parseInt(resizeWidth, 10) || null,
-            height: parseInt(resizeHeight, 10) || null,
-            maintainAspect,
-          },
-          setProgress
-        );
-        const url = registerUrl(resized.url);
-        setResult({
-          type: "download",
-          blob: resized.blob,
-          url,
-          filename: `resized_${resized.width}x${resized.height}_${files[0].name}`,
-          size: resized.blob.size,
-          previewUrl: url,
-          message: `Image resized to ${resized.width} × ${resized.height} px.`,
-        });
+        if (files.length === 1) {
+          const resized = await resizeImage(
+            files[0],
+            {
+              width: parseInt(resizeWidth, 10) || null,
+              height: parseInt(resizeHeight, 10) || null,
+              maintainAspect,
+            },
+            setProgress
+          );
+          const url = registerUrl(resized.url);
+          setResult({
+            type: "download",
+            blob: resized.blob,
+            url,
+            filename: `resized_${resized.width}x${resized.height}_${files[0].name}`,
+            size: resized.blob.size,
+            previewUrl: url,
+            message: `Image resized to ${resized.width} × ${resized.height} px.`,
+          });
+        } else {
+          const { default: JSZip } = await import("jszip");
+          const zip = new JSZip();
+          const items = [];
+          for (let i = 0; i < files.length; i++) {
+            const f = files[i];
+            const resized = await resizeImage(
+              f,
+              {
+                width: parseInt(resizeWidth, 10) || null,
+                height: parseInt(resizeHeight, 10) || null,
+                maintainAspect,
+              },
+              (p) => setProgress(Math.round(((i + p / 100) / files.length) * 100))
+            );
+            const outName = `resized_${resized.width}x${resized.height}_${f.name}`;
+            const itemUrl = registerUrl(resized.url);
+            zip.file(outName, resized.blob);
+            items.push({
+              filename: outName,
+              originalName: f.name,
+              size: resized.blob.size,
+              url: itemUrl,
+              previewUrl: itemUrl,
+            });
+          }
+          const zipBlob = await zip.generateAsync({ type: "blob" });
+          const zipUrl = registerUrl(URL.createObjectURL(zipBlob));
+          setResult({
+            type: "batch-images",
+            items,
+            url: zipUrl,
+            filename: "resized_images.zip",
+            size: zipBlob.size,
+            message: `Successfully resized ${files.length} images!`,
+          });
+        }
       } else if (slug === "convert-image") {
         const ext = convertFormat === "image/webp" ? ".webp" : convertFormat === "image/jpeg" ? ".jpg" : ".png";
         const { convertImage } = await getImg();
-        const converted = await convertImage(files[0], convertFormat, 0.9, setProgress);
-        const base = files[0].name.replace(/\.[^/.]+$/, "");
-        const url = registerUrl(converted.url);
-        setResult({
-          type: "download",
-          blob: converted.blob,
-          url,
-          filename: `${base}${ext}`,
-          size: converted.blob.size,
-          previewUrl: url,
-          message: `Image converted to ${convertFormat.replace("image/", "").toUpperCase()}.`,
-        });
+        if (files.length === 1) {
+          const converted = await convertImage(files[0], convertFormat, 0.9, setProgress);
+          const base = files[0].name.replace(/\.[^/.]+$/, "");
+          const url = registerUrl(converted.url);
+          setResult({
+            type: "download",
+            blob: converted.blob,
+            url,
+            filename: `${base}${ext}`,
+            size: converted.blob.size,
+            previewUrl: url,
+            message: `Image converted to ${convertFormat.replace("image/", "").toUpperCase()}.`,
+          });
+        } else {
+          const { default: JSZip } = await import("jszip");
+          const zip = new JSZip();
+          const items = [];
+          for (let i = 0; i < files.length; i++) {
+            const f = files[i];
+            const converted = await convertImage(f, convertFormat, 0.9, (p) => {
+              setProgress(Math.round(((i + p / 100) / files.length) * 100));
+            });
+            const base = f.name.replace(/\.[^/.]+$/, "");
+            const outName = `${base}${ext}`;
+            const itemUrl = registerUrl(converted.url);
+            zip.file(outName, converted.blob);
+            items.push({
+              filename: outName,
+              originalName: f.name,
+              size: converted.blob.size,
+              url: itemUrl,
+              previewUrl: itemUrl,
+            });
+          }
+          const zipBlob = await zip.generateAsync({ type: "blob" });
+          const zipUrl = registerUrl(URL.createObjectURL(zipBlob));
+          setResult({
+            type: "batch-images",
+            items,
+            url: zipUrl,
+            filename: `converted_images_${convertFormat.replace("image/", "")}.zip`,
+            size: zipBlob.size,
+            message: `Successfully converted ${files.length} images to ${convertFormat.replace("image/", "").toUpperCase()}!`,
+          });
+        }
       } else if (slug === "crop-image") {
         const { cropImage } = await getImg();
         const cropped = await cropImage(
@@ -412,34 +533,89 @@ export default function ToolView({ tool }) {
         });
       } else if (slug === "rotate-image") {
         const { rotateAndFlipImage } = await getImg();
-        const rot = await rotateAndFlipImage(files[0], Number(rotationAngle), false, false, setProgress);
-        const url = registerUrl(rot.url);
-        setResult({
-          type: "download",
-          blob: rot.blob,
-          url,
-          filename: `rotated_${files[0].name}`,
-          size: rot.blob.size,
-          previewUrl: url,
-          message: `Image rotated by ${rotationAngle}°.`,
-        });
+        if (files.length === 1) {
+          const rot = await rotateAndFlipImage(files[0], Number(rotationAngle), false, false, setProgress);
+          const url = registerUrl(rot.url);
+          setResult({
+            type: "download",
+            blob: rot.blob,
+            url,
+            filename: `rotated_${files[0].name}`,
+            size: rot.blob.size,
+            previewUrl: url,
+            message: `Image rotated by ${rotationAngle}°.`,
+          });
+        } else {
+          const { default: JSZip } = await import("jszip");
+          const zip = new JSZip();
+          const items = [];
+          for (let i = 0; i < files.length; i++) {
+            const f = files[i];
+            const rot = await rotateAndFlipImage(f, Number(rotationAngle), false, false, (p) => {
+              setProgress(Math.round(((i + p / 100) / files.length) * 100));
+            });
+            const outName = `rotated_${f.name}`;
+            const itemUrl = registerUrl(rot.url);
+            zip.file(outName, rot.blob);
+            items.push({
+              filename: outName,
+              originalName: f.name,
+              size: rot.blob.size,
+              url: itemUrl,
+              previewUrl: itemUrl,
+            });
+          }
+          const zipBlob = await zip.generateAsync({ type: "blob" });
+          const zipUrl = registerUrl(URL.createObjectURL(zipBlob));
+          setResult({
+            type: "batch-images",
+            items,
+            url: zipUrl,
+            filename: `rotated_images.zip`,
+            size: zipBlob.size,
+            message: `Successfully rotated ${files.length} images!`,
+          });
+        }
       } else if (slug === "image-dpi-calculator") {
         const { getImageMetadata, calculatePrintDimensions } = await getImg();
         const meta = await getImageMetadata(files[0]);
         const calc = calculatePrintDimensions(meta.width, meta.height, Number(imageDpi));
         setProgress(100);
+        const reportText = `PDFpadar — Image DPI & Print Dimensions Calculation Report
+File: ${files[0].name}
+Resolution: ${meta.width} × ${meta.height} px (${calc.megapixels})
+Target DPI: ${imageDpi} DPI
+Print Dimensions (Inches): ${calc.inches}
+Print Dimensions (Centimeters): ${calc.cm}
+Print Dimensions (Millimeters): ${calc.mm}
+Print Quality Rating: ${calc.printQuality}
+Calculated at: ${new Date().toLocaleString()}
+`;
+        const blob = new Blob([reportText], { type: "text/plain" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "dpi-calc",
           meta,
           calc,
+          url,
+          filename: `${files[0].name.replace(/\.[^/.]+$/, "")}_dpi_${imageDpi}.txt`,
+          size: blob.size,
+          message: `Calculated print dimensions at ${imageDpi} DPI.`,
         });
       } else if (slug === "image-metadata") {
         const { getImageMetadata } = await getImg();
         const meta = await getImageMetadata(files[0]);
         setProgress(100);
+        const jsonText = JSON.stringify(meta, null, 2);
+        const blob = new Blob([jsonText], { type: "application/json" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "image-meta",
           meta,
+          url,
+          filename: `${files[0].name.replace(/\.[^/.]+$/, "")}_metadata.json`,
+          size: blob.size,
+          message: `Extracted properties and metadata for ${files[0].name}.`,
         });
       }
 
@@ -1013,67 +1189,114 @@ export default function ToolView({ tool }) {
         )}
 
         {/* Action Button Bar */}
-        {!result && (
+        {!result ? (
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               type="button"
               onClick={executeProcess}
               disabled={files.length === 0 || processing}
-              className="flex-1 min-w-[200px] flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl font-bold text-white bg-brand-600 hover:bg-brand-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all text-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/30"
+              className="flex-1 min-w-[200px] flex items-center justify-center gap-2.5 py-4 px-6 rounded-2xl font-black text-white bg-brand-600 hover:bg-brand-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-brand-600/20 transition-all text-base focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/30"
             >
-              <DynamicIcon name={tool.icon} className="w-4 h-4" />
-              <span>{processing ? "Processing..." : `Process with ${tool.name}`}</span>
+              <DynamicIcon name={tool.icon} className="w-5 h-5" />
+              <span>
+                {processing
+                  ? "Processing..."
+                  : files.length > 1
+                  ? `Process & Download All (${files.length} Files)`
+                  : `Process & Download Output`}
+              </span>
             </button>
 
             {files.length > 0 && !processing && (
               <button
                 type="button"
                 onClick={handleReset}
-                className="py-3.5 px-5 rounded-2xl font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-sm flex items-center gap-2"
+                className="py-4 px-5 rounded-2xl font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-sm flex items-center gap-2"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>Reset</span>
               </button>
             )}
           </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            {result.url && (
+              <a
+                href={result.url}
+                download={result.filename || "output"}
+                onClick={() => triggerDownload(result.url, result.filename)}
+                className="flex-1 min-w-[240px] flex items-center justify-center gap-2.5 py-4 px-6 rounded-2xl font-black text-white bg-brand-600 hover:bg-brand-500 shadow-lg shadow-brand-600/30 hover:scale-[1.01] active:scale-[0.99] transition-all text-base focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/30"
+              >
+                <Download className="w-5 h-5" />
+                <span>Download {result.filename || "Processed Output"}</span>
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={handleReset}
+              className="py-4 px-5 rounded-2xl font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-sm flex items-center gap-2"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Process Another File</span>
+            </button>
+          </div>
         )}
       </div>
 
       {/* --- RESULT EXPERIENCE --- */}
       {result && (
-        <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 animate-in fade-in duration-300 space-y-6">
+        <div ref={resultRef} className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 animate-in fade-in duration-300 space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-brand-600 dark:text-brand-400 font-bold text-sm">
               <CheckCircle2 className="w-5 h-5" />
-              <span>Task Complete!</span>
+              <span>Processing Complete! Download Ready</span>
             </div>
             <button
-                type="button"
-                onClick={handleReset}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Process another file</span>
-              </button>
-            </div>
+              type="button"
+              onClick={handleReset}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Process another file</span>
+            </button>
+          </div>
 
-            {/* Visual In-Browser Preview for Images */}
-            {result.previewUrl && (
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  <Eye className="w-3.5 h-3.5" />
+          {/* Visual In-Browser Preview for Images with Direct Download Controls */}
+          {result.previewUrl && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <Eye className="w-4 h-4 text-brand-500" />
                   <span>Visual Result Preview</span>
                 </div>
-                <div className="flex justify-center max-h-72 overflow-hidden rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={result.previewUrl}
-                    alt="Processed preview"
-                    className="max-h-64 object-contain rounded-lg"
-                  />
-                </div>
+                {result.url && (
+                  <a
+                    href={result.url}
+                    download={result.filename || "image"}
+                    onClick={() => triggerDownload(result.url, result.filename)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-sm transition-all"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download Image</span>
+                  </a>
+                )}
               </div>
-            )}
+              <div className="flex justify-center max-h-80 overflow-hidden rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 p-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={result.previewUrl}
+                  alt="Processed preview"
+                  className="max-h-72 object-contain rounded-lg"
+                />
+              </div>
+              {result.filename && (
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs text-slate-500 dark:text-slate-400">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300 truncate max-w-xs">{result.filename}</span>
+                  {result.size && <span className="font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[11px]">{formatBytes(result.size)}</span>}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Standard Download Box */}
           {result.type === "download" && (
@@ -1088,14 +1311,15 @@ export default function ToolView({ tool }) {
                   </p>
                 )}
               </div>
-              <button
-                type="button"
+              <a
+                href={result.url}
+                download={result.filename}
                 onClick={() => triggerDownload(result.url, result.filename)}
-                className="inline-flex items-center gap-2 py-3.5 px-6 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-md shadow-brand-600/20 transition-all text-sm"
+                className="inline-flex items-center gap-2 py-4 px-6 rounded-xl font-extrabold text-white bg-brand-600 hover:bg-brand-500 shadow-md shadow-brand-600/20 hover:scale-[1.01] active:scale-[0.99] transition-all text-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Download {result.filename}</span>
-              </button>
+              </a>
             </div>
           )}
 
@@ -1124,18 +1348,122 @@ export default function ToolView({ tool }) {
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
                   <span className="text-xs font-medium text-slate-400 block">Format</span>
                   <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
-                    {result.type.replace("image/", "").toUpperCase()}
+                    {(result.type && result.type !== "compress" ? result.type : result.filename.split('.').pop()).toUpperCase()}
                   </span>
                 </div>
               </div>
-              <button
-                type="button"
+              <a
+                href={result.url}
+                download={result.filename}
                 onClick={() => triggerDownload(result.url, result.filename)}
-                className="inline-flex items-center gap-2 py-3.5 px-6 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-md transition-all text-sm"
+                className="inline-flex items-center gap-2 py-4 px-6 rounded-xl font-extrabold text-white bg-brand-600 hover:bg-brand-500 shadow-md shadow-brand-600/20 hover:scale-[1.01] active:scale-[0.99] transition-all text-sm"
               >
                 <Download className="w-4 h-4" />
-                <span>Download Compressed Image</span>
-              </button>
+                <span>Download Compressed Image ({formatBytes(result.compressedSize)})</span>
+              </a>
+            </div>
+          )}
+
+          {/* Multiple Images Batch Result */}
+          {result.type === "batch-images" && (
+            <div className="space-y-4">
+              <div className="p-6 rounded-2xl bg-brand-50/80 dark:bg-brand-950/30 border border-brand-200/80 dark:border-brand-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-bold text-slate-900 dark:text-white text-base">
+                    {result.message}
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    ZIP Archive size: {formatBytes(result.size)} • {result.items.length} images processed
+                  </p>
+                </div>
+                <a
+                  href={result.url}
+                  download={result.filename}
+                  onClick={() => triggerDownload(result.url, result.filename)}
+                  className="inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-md transition-all text-sm shrink-0"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download All as ZIP</span>
+                </a>
+              </div>
+
+              {/* Individual image download cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {result.items.map((item, idx) => (
+                  <div key={idx} className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-sm">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {item.previewUrl && (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={item.previewUrl} alt={item.filename} className="w-10 h-10 object-cover rounded-lg shrink-0 border border-slate-200 dark:border-slate-800" />
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{item.filename}</p>
+                        <p className="text-[11px] text-slate-400">{formatBytes(item.size || item.compressedSize)}</p>
+                      </div>
+                    </div>
+                    <a
+                      href={item.url}
+                      download={item.filename}
+                      onClick={() => triggerDownload(item.url, item.filename)}
+                      className="p-2 rounded-lg bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 hover:bg-brand-100 transition-colors shrink-0"
+                      title={`Download ${item.filename}`}
+                    >
+                      <Download className="w-4 h-4" />
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Image Metadata / EXIF Output */}
+          {result.type === "image-meta" && (
+            <div className="space-y-4">
+              <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white text-base">
+                      Image Properties &amp; EXIF Metadata
+                    </h4>
+                    <p className="text-xs text-slate-400 mt-0.5">{result.meta.name}</p>
+                  </div>
+                  <a
+                    href={result.url}
+                    download={result.filename}
+                    onClick={() => triggerDownload(result.url, result.filename)}
+                    className="inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow transition-all text-xs shrink-0"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download Metadata (.json)</span>
+                  </a>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+                    <span className="text-xs text-slate-400 block">Dimensions</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{result.meta.width} × {result.meta.height} px</span>
+                  </div>
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+                    <span className="text-xs text-slate-400 block">Aspect Ratio</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{result.meta.aspectRatio}</span>
+                  </div>
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+                    <span className="text-xs text-slate-400 block">Megapixels</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{result.meta.megapixels}</span>
+                  </div>
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+                    <span className="text-xs text-slate-400 block">File Size</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{formatBytes(result.meta.size)}</span>
+                  </div>
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+                    <span className="text-xs text-slate-400 block">MIME Type</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{result.meta.type}</span>
+                  </div>
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+                    <span className="text-xs text-slate-400 block">Last Modified</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">{result.meta.lastModified}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -1326,6 +1654,19 @@ export default function ToolView({ tool }) {
                             </span>
                           </div>
                         </div>
+                        {result.url && (
+                          <div className="flex justify-end pt-2">
+                            <a
+                              href={result.url}
+                              download={result.filename}
+                              onClick={() => triggerDownload(result.url, result.filename)}
+                              className="inline-flex items-center gap-2 py-3 px-5 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-sm transition-all text-xs"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>Download Print Spec Report (.txt)</span>
+                            </a>
+                          </div>
+                        )}
                       </div>
                     )}
 
