@@ -13,15 +13,12 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = localStorage.getItem("pdfpadar-theme");
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.classList.toggle("dark", savedTheme === "dark");
-    } else {
-      // Default to the soothing light-orange theme
-      setTheme("light");
-      document.documentElement.classList.remove("dark");
-    }
+    // Enforce the eye-soothing light-orange theme
+    setTheme("light");
+    document.documentElement.classList.remove("dark");
+    try {
+      localStorage.removeItem("pdfpadar-theme");
+    } catch (e) {}
   }, []);
 
   const toggleTheme = () => {
