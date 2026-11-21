@@ -81,28 +81,27 @@ def generate_favicons():
         'apple_180': master_img.resize((180, 180), Image.Resampling.LANCZOS),
     }
 
-    # Ensure target directories exist
+    # Ensure public directory exists
     os.makedirs('public', exist_ok=True)
-    os.makedirs('src/app', exist_ok=True)
 
-    # 1. Write vector SVGs
-    for p in ['public/icon.svg', 'src/app/icon.svg', 'public/apple-icon.svg', 'src/app/apple-icon.svg']:
+    # 1. Write vector SVGs to public/
+    for p in ['public/icon.svg', 'public/apple-icon.svg']:
         with open(p, 'w', encoding='utf-8') as f:
             f.write(svg_body)
         print(f"✓ Saved vector SVG: {p}")
 
-    # 2. Write PNGs
-    for p in ['public/icon.png', 'src/app/icon.png']:
+    # 2. Write PNGs to public/
+    for p in ['public/icon.png']:
         sizes['icon_512'].save(p, format='PNG', optimize=True)
         print(f"✓ Saved 512x512 PNG: {p}")
 
-    for p in ['public/apple-icon.png', 'src/app/apple-icon.png']:
+    for p in ['public/apple-icon.png']:
         sizes['apple_180'].save(p, format='PNG', optimize=True)
         print(f"✓ Saved 180x180 Apple Touch Icon: {p}")
 
     # 3. Create true multi-resolution ICO (16, 32, 48, 64, 128, 256)
     ico_sizes = [(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
-    for p in ['public/favicon.ico', 'src/app/favicon.ico']:
+    for p in ['public/favicon.ico']:
         master_img.save(p, format='ICO', sizes=ico_sizes)
         print(f"✓ Saved multi-resolution ICO: {p}")
 
