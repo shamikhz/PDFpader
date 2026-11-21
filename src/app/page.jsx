@@ -97,8 +97,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Popular Tools Section (Only shown when not actively filtering by query) */}
-      {!searchQuery && selectedCategory === "all" && (
+      {/* 3. Popular Tools Section (Shown when viewing all tools) */}
+      {selectedCategory === "all" && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6" aria-label="Popular Tools">
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
             <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
