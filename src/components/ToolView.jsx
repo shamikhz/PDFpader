@@ -1264,6 +1264,7 @@ Calculated at: ${new Date().toLocaleString()}
                       { id: "custom", label: "Custom" },
                       { id: "1:1", label: "1:1 Square", ratio: 1 },
                       { id: "16:9", label: "16:9", ratio: 16 / 9 },
+                      { id: "9:16", label: "9:16 Vertical", ratio: 9 / 16 },
                       { id: "4:3", label: "4:3", ratio: 4 / 3 },
                       { id: "3:2", label: "3:2", ratio: 3 / 2 },
                     ].map((preset) => (
