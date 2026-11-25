@@ -3,8 +3,15 @@ import Breadcrumb from "@/components/Breadcrumb";
 import { FileText } from "lucide-react";
 
 export const metadata = {
-  title: "Terms of Service | PDFpadar",
-  description: "Terms and conditions for utilizing the PDFpadar in-browser file utility platform.",
+  title: "Terms of Service — PDFpadar File Processing Platform",
+  description: "Terms and conditions for using PDFpadar's free, in-browser PDF, image, and file utility tools. No registration required. All processing is 100% client-side.",
+  alternates: { canonical: "https://pdfpadar.com/terms" },
+  openGraph: {
+    title: "Terms of Service — PDFpadar",
+    description: "Terms and conditions for using PDFpadar's free, private, in-browser file tools.",
+    url: "https://pdfpadar.com/terms",
+    siteName: "PDFpadar",
+  },
 };
 
 export default function TermsPage() {

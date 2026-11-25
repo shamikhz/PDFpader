@@ -27,8 +27,15 @@ export default function ToolLayout({ tool, relatedTools = [] }) {
         ? "Image Tools"
         : "File Utilities";
 
+  const categoryHref =
+    tool.category === "pdf"
+      ? "/#pdf-tools"
+      : tool.category === "image"
+        ? "/#image-tools"
+        : "/#file-utilities";
+
   const breadcrumbs = [
-    { label: categoryName, href: `/#${tool.category}-tools` },
+    { label: categoryName, href: categoryHref },
     { label: tool.name },
   ];
 
@@ -58,6 +65,13 @@ export default function ToolLayout({ tool, relatedTools = [] }) {
         <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
           {tool.shortDesc}
         </p>
+
+        {/* Intro paragraph — richer SEO content */}
+        {tool.intro && (
+          <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto">
+            {tool.intro}
+          </p>
+        )}
 
         {/* 5. Supported Formats & Limitations */}
         <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-xs text-slate-500 dark:text-slate-400">

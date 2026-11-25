@@ -1,4 +1,4 @@
-export const TOOL_CATEGORIES = [
+﻿export const TOOL_CATEGORIES = [
   { id: "pdf", name: "PDF Tools", description: "Merge, split, rotate, watermark, protect, and edit PDF documents locally." },
   { id: "image", name: "Image Tools", description: "Compress, resize, convert, crop, rotate, and optimize images directly in your browser." },
   { id: "file", name: "File Utilities", description: "Archive ZIPs, calculate hashes, compare files, analyze sizes, and batch rename files." },
@@ -11,6 +11,7 @@ export const TOOLS = [
     category: "pdf",
     name: "Merge PDF",
     shortDesc: "Combine multiple PDF files into a single unified document in any order.",
+    intro: "Need to combine several PDF documents into one? PDFpadar's free online PDF merger lets you join multiple PDF files instantly â€” directly in your browser, with zero file uploads and complete privacy.",
     icon: "Layers",
     badge: "100% Client-Side",
     accept: ".pdf,application/pdf",
@@ -20,7 +21,7 @@ export const TOOLS = [
       "Merge unlimited PDF documents",
       "Interactive page-order reordering",
       "Maintains original document fidelity",
-      "No file upload — 100% private in browser",
+      "No file upload â€” 100% private in browser",
     ],
     instructions: [
       "Select or drag & drop two or more PDF files into the upload box.",
@@ -31,24 +32,33 @@ export const TOOLS = [
     faqs: [
       {
         q: "Is there a limit on how many PDFs I can merge?",
-        a: "Because processing runs entirely in your local browser memory, you can merge dozens of files at once. Performance depends on your device's available RAM."
+        a: "Because processing runs entirely in your local browser memory, you can merge dozens of files at once. Performance depends on your device's available RAM.",
       },
       {
         q: "Are my sensitive PDF documents uploaded to your servers?",
-        a: "No! PDFpadar operates 100% in your browser using WebAssembly and client-side JavaScript. Your files never leave your computer or smartphone."
+        a: "No! PDFpadar operates 100% in your browser using WebAssembly and client-side JavaScript. Your files never leave your computer or smartphone.",
       },
       {
         q: "Does merging affect the quality or hyperlinks in my PDFs?",
-        a: "No, PDFpadar merges vector graphics, fonts, embedded images, and document structures without re-compressing or degrading resolution."
-      }
+        a: "No, PDFpadar merges vector graphics, fonts, embedded images, and document structures without re-compressing or degrading resolution.",
+      },
+      {
+        q: "How do I merge PDF files online for free?",
+        a: "Simply open PDFpadar's Merge PDF tool, upload two or more PDF files, arrange them in order, and click Merge PDFs. The combined document downloads instantly at no cost.",
+      },
+      {
+        q: "Can I reorder pages before merging?",
+        a: "Yes. You can reorder the uploaded PDF files using the move-up and move-down buttons before initiating the merge.",
+      },
     ],
-    related: ["split-pdf", "organize-pdf", "rotate-pdf", "add-page-numbers"]
+    related: ["split-pdf", "organize-pdf", "rotate-pdf", "add-page-numbers"],
   },
   {
     slug: "split-pdf",
     category: "pdf",
     name: "Split PDF",
     shortDesc: "Extract specific page ranges or split a PDF into separate single-page documents.",
+    intro: "Split large PDF files into smaller, focused documents. Extract exact pages or separate every page â€” all processed locally in your browser with no uploads required.",
     icon: "Scissors",
     badge: "100% Client-Side",
     accept: ".pdf,application/pdf",
@@ -58,61 +68,79 @@ export const TOOLS = [
       "Split by custom page ranges (e.g., 1-3, 5, 8-10)",
       "Extract every page into individual separate PDFs",
       "Instant ZIP download option for batch extracted pages",
-      "No quality loss or metadata corruption"
+      "No quality loss or metadata corruption",
     ],
     instructions: [
       "Upload the PDF document you want to split.",
       "Choose to extract specific page ranges (e.g. '1-3, 5') or split into individual single pages.",
       "Click 'Split PDF' to process the document.",
-      "Download your split PDF or a ZIP archive containing all extracted pages."
+      "Download your split PDF or a ZIP archive containing all extracted pages.",
     ],
     faqs: [
       {
         q: "How do I specify page ranges?",
-        a: "Enter comma-separated numbers and ranges, such as '1-4, 7, 9-12'. Pages will be extracted exactly as specified."
+        a: "Enter comma-separated numbers and ranges, such as '1-4, 7, 9-12'. Pages will be extracted exactly as specified.",
       },
       {
         q: "Can I extract all pages as a ZIP file?",
-        a: "Yes! Select the 'Extract all pages individually' option, and PDFpadar will generate a download containing all separate pages in a single ZIP."
-      }
+        a: "Yes! Select the 'Extract all pages individually' option, and PDFpadar will generate a download containing all separate pages in a single ZIP.",
+      },
+      {
+        q: "How do I split a PDF into multiple files?",
+        a: "Upload your PDF, enter page ranges like '1-5, 6-10, 11-20', and each range becomes a separate downloadable PDF.",
+      },
+      {
+        q: "Does splitting reduce PDF quality?",
+        a: "No. Splitting only separates pages â€” it does not re-compress, re-rasterize, or modify text or image content in any way.",
+      },
     ],
-    related: ["merge-pdf", "delete-pdf-pages", "extract-pdf-pages", "organize-pdf"]
+    related: ["merge-pdf", "delete-pdf-pages", "extract-pdf-pages", "organize-pdf"],
   },
   {
     slug: "rotate-pdf",
     category: "pdf",
     name: "Rotate PDF",
     shortDesc: "Permanently rotate all or specific pages of your PDF by 90, 180, or 270 degrees.",
+    intro: "Fix incorrectly oriented PDF pages without any software. Rotate all pages or select specific ones â€” the adjustment is permanent and lossless, happening entirely in your browser.",
     icon: "RotateCw",
     badge: "100% Client-Side",
     accept: ".pdf,application/pdf",
     multiple: false,
     maxSizeMB: 100,
     features: [
-      "Rotate 90° clockwise, 180°, or 90° counter-clockwise",
+      "Rotate 90Â° clockwise, 180Â°, or 90Â° counter-clockwise",
       "Apply rotation to all pages or specific page indices",
       "Permanent orientation adjustment without rasterization",
-      "Ultra-fast local processing"
+      "Ultra-fast local processing",
     ],
     instructions: [
       "Upload your PDF file.",
-      "Select the rotation angle (90° Clockwise, 180°, or 270° / 90° Counter-Clockwise).",
+      "Select the rotation angle (90Â° Clockwise, 180Â°, or 270Â° / 90Â° Counter-Clockwise).",
       "Choose whether to rotate all pages or only odd, even, or specific pages.",
-      "Click 'Rotate & Download' to save your updated PDF."
+      "Click 'Rotate & Download' to save your updated PDF.",
     ],
     faqs: [
       {
         q: "Will rotating a PDF blur or reduce image quality?",
-        a: "No. PDF rotation merely modifies the internal orientation matrix of the pages. Text and images remain sharp vectors and pristine rasters."
-      }
+        a: "No. PDF rotation merely modifies the internal orientation matrix of the pages. Text and images remain sharp vectors and pristine rasters.",
+      },
+      {
+        q: "How do I rotate a PDF page permanently?",
+        a: "Upload your PDF, select the rotation angle, and click Rotate & Download. The new PDF saves with the rotation permanently embedded.",
+      },
+      {
+        q: "Can I rotate only certain pages?",
+        a: "Yes. You can choose to rotate all pages, or specify even, odd, or custom page numbers only.",
+      },
     ],
-    related: ["organize-pdf", "merge-pdf", "split-pdf", "delete-pdf-pages"]
+    related: ["organize-pdf", "merge-pdf", "split-pdf", "delete-pdf-pages"],
   },
   {
     slug: "delete-pdf-pages",
     category: "pdf",
     name: "Delete PDF Pages",
     shortDesc: "Remove unwanted or blank pages from your PDF documents with precision.",
+    intro: "Delete specific pages from a PDF instantly. Whether removing blank pages, cover sheets, or confidential sections â€” just specify the page numbers and download the trimmed result.",
     icon: "Trash2",
     badge: "100% Client-Side",
     accept: ".pdf,application/pdf",
@@ -122,27 +150,32 @@ export const TOOLS = [
       "Target specific pages or page ranges to delete (e.g. 2, 4-6)",
       "Preview total remaining page count",
       "Preserves all annotations and intact links",
-      "Zero server uploads"
+      "Zero server uploads",
     ],
     instructions: [
       "Upload your PDF.",
       "Enter the page numbers you wish to remove (e.g., '1, 3, 5-7').",
       "Click 'Delete Pages & Save'.",
-      "Download your trimmed document."
+      "Download your trimmed document.",
     ],
     faqs: [
       {
         q: "Can I delete multiple non-consecutive pages?",
-        a: "Yes, you can specify individual numbers separated by commas, such as '2, 5, 9, 14'."
-      }
+        a: "Yes, you can specify individual numbers separated by commas, such as '2, 5, 9, 14'.",
+      },
+      {
+        q: "How do I remove blank pages from a PDF?",
+        a: "Open the PDF, identify the blank page numbers by previewing, enter those numbers in the delete field, and download the cleaned PDF.",
+      },
     ],
-    related: ["extract-pdf-pages", "organize-pdf", "split-pdf", "rotate-pdf"]
+    related: ["extract-pdf-pages", "organize-pdf", "split-pdf", "rotate-pdf"],
   },
   {
     slug: "extract-pdf-pages",
     category: "pdf",
     name: "Extract PDF Pages",
     shortDesc: "Select and extract exact pages from a PDF to create a new compact document.",
+    intro: "Extract only the pages you need from a large PDF and save them as a new document. Perfect for pulling out specific chapters, reports, or sections without keeping the rest.",
     icon: "FileOutput",
     badge: "100% Client-Side",
     accept: ".pdf,application/pdf",
@@ -152,27 +185,32 @@ export const TOOLS = [
       "Select only the pages you need",
       "Combine selected pages into a single new PDF",
       "High speed in-browser processing",
-      "Completely private"
+      "Completely private",
     ],
     instructions: [
       "Upload your PDF document.",
       "Specify the pages you want to keep (e.g., '1, 3, 5-10').",
       "Click 'Extract Selected Pages'.",
-      "Download your new, focused PDF."
+      "Download your new, focused PDF.",
     ],
     faqs: [
       {
         q: "How does Extract differ from Split?",
-        a: "Extract allows you to pick a subset of pages and combine them into a single new output document, while Split can also generate individual 1-page documents."
-      }
+        a: "Extract allows you to pick a subset of pages and combine them into a single new output document, while Split can also generate individual 1-page documents.",
+      },
+      {
+        q: "Can I extract a chapter from a large PDF?",
+        a: "Yes. If your chapter spans pages 42â€“68, enter '42-68' and the tool produces a new PDF with just those pages.",
+      },
     ],
-    related: ["delete-pdf-pages", "split-pdf", "organize-pdf", "merge-pdf"]
+    related: ["delete-pdf-pages", "split-pdf", "organize-pdf", "merge-pdf"],
   },
   {
     slug: "organize-pdf",
     category: "pdf",
     name: "Organize PDF Pages",
     shortDesc: "Reorder, duplicate, or rearrange pages in your PDF document into any sequence.",
+    intro: "Rearrange the pages of a PDF into any order you need. Great for restructuring reports, reordering chapters, or duplicating pages for presentation layouts.",
     icon: "ArrowUpDown",
     badge: "100% Client-Side",
     accept: ".pdf,application/pdf",
@@ -182,27 +220,32 @@ export const TOOLS = [
       "Custom page sequencing (e.g., 5, 2, 1, 3, 4)",
       "Duplicate pages if needed",
       "Fast client-side reconstruction",
-      "No quality loss"
+      "No quality loss",
     ],
     instructions: [
       "Upload your PDF.",
       "Enter the new desired page order sequence (e.g., '3, 1, 2, 4').",
       "Click 'Reorganize Pages'.",
-      "Download your newly structured PDF document."
+      "Download your newly structured PDF document.",
     ],
     faqs: [
       {
         q: "Can I repeat a page multiple times?",
-        a: "Yes! If you enter '1, 1, 2, 3', page 1 will be duplicated at the beginning."
-      }
+        a: "Yes! If you enter '1, 1, 2, 3', page 1 will be duplicated at the beginning.",
+      },
+      {
+        q: "How do I rearrange pages in a PDF?",
+        a: "Upload the PDF, type the new page order (e.g., 3, 1, 4, 2), and click Reorganize Pages. The new PDF downloads with pages in your specified sequence.",
+      },
     ],
-    related: ["rotate-pdf", "merge-pdf", "split-pdf", "delete-pdf-pages"]
+    related: ["rotate-pdf", "merge-pdf", "split-pdf", "delete-pdf-pages"],
   },
   {
     slug: "add-watermark",
     category: "pdf",
     name: "Add Watermark to PDF",
     shortDesc: "Stamp custom text watermarks across every page of your PDF with custom opacity and rotation.",
+    intro: "Protect your documents or indicate their status (DRAFT, CONFIDENTIAL, SAMPLE) with a text watermark. Customize opacity, size, and rotation â€” no design skills needed.",
     icon: "Stamp",
     badge: "100% Client-Side",
     accept: ".pdf,application/pdf",
@@ -212,27 +255,36 @@ export const TOOLS = [
       "Custom text stamping (e.g. CONFIDENTIAL, DRAFT, SAMPLE)",
       "Configurable opacity, font size, and diagonal rotation angle",
       "Applies across all pages automatically",
-      "No server processing required"
+      "No server processing required",
     ],
     instructions: [
       "Upload your PDF.",
       "Enter your watermark text and configure font size, opacity, and rotation.",
       "Click 'Apply Watermark'.",
-      "Download your stamped PDF."
+      "Download your stamped PDF.",
     ],
     faqs: [
       {
         q: "Can I adjust the transparency so the text behind it is readable?",
-        a: "Yes! The opacity slider lets you select subtle 10% to 50% transparency so the underlying content remains clear."
-      }
+        a: "Yes! The opacity slider lets you select subtle 10% to 50% transparency so the underlying content remains clear.",
+      },
+      {
+        q: "How do I add a DRAFT watermark to a PDF?",
+        a: "Upload your PDF, type DRAFT in the watermark text field, adjust opacity to around 20%, and click Apply Watermark.",
+      },
+      {
+        q: "Is the watermark permanent?",
+        a: "Yes. The watermark is embedded as vector text into each PDF page and cannot be removed without specialized PDF editing software.",
+      },
     ],
-    related: ["add-page-numbers", "protect-pdf", "pdf-metadata", "merge-pdf"]
+    related: ["add-page-numbers", "protect-pdf", "pdf-metadata", "merge-pdf"],
   },
   {
     slug: "add-page-numbers",
     category: "pdf",
     name: "Add Page Numbers",
     shortDesc: "Insert professional page numbering (e.g., Page 1 of N) into your PDF pages.",
+    intro: "Add clean page numbers to your PDF documents for professional presentations, reports, and printed manuals. Choose from multiple formats and positions with a single click.",
     icon: "Hash",
     badge: "100% Client-Side",
     accept: ".pdf,application/pdf",
@@ -242,27 +294,32 @@ export const TOOLS = [
       "Multiple formats: 'Page X of Y' or 'X'",
       "Positions: Bottom-Center, Bottom-Right, Top-Center, Top-Right",
       "Custom starting number and font sizing",
-      "Vector text injection without altering existing layers"
+      "Vector text injection without altering existing layers",
     ],
     instructions: [
       "Upload your PDF.",
       "Select your preferred numbering format and position on the page.",
       "Click 'Add Page Numbers'.",
-      "Download your numbered document."
+      "Download your numbered document.",
     ],
     faqs: [
       {
         q: "Does this overwrite existing text on the page?",
-        a: "No, page numbers are placed in the page margins and overlaid cleanly."
-      }
+        a: "No, page numbers are placed in the page margins and overlaid cleanly.",
+      },
+      {
+        q: "Can I start numbering from a specific page number?",
+        a: "Yes. Set the starting number so if your document begins at page 5, the first page will display as 5.",
+      },
     ],
-    related: ["add-watermark", "merge-pdf", "pdf-page-size", "organize-pdf"]
+    related: ["add-watermark", "merge-pdf", "pdf-page-size", "organize-pdf"],
   },
   {
     slug: "protect-pdf",
     category: "pdf",
     name: "Protect PDF with Password",
     shortDesc: "Encrypt your PDF document with a password to prevent unauthorized viewing and copying.",
+    intro: "Password-protect sensitive PDF documents before sharing them. The encryption runs entirely in your browser â€” your password and file never touch a server.",
     icon: "Lock",
     badge: "100% Client-Side",
     accept: ".pdf,application/pdf",
@@ -272,27 +329,36 @@ export const TOOLS = [
       "Standard PDF password encryption",
       "Protects against unauthorized opening and printing",
       "Encrypted locally before saving",
-      "Zero server transmission"
+      "Zero server transmission",
     ],
     instructions: [
       "Upload your PDF.",
       "Enter a strong password of your choice.",
       "Click 'Encrypt & Protect PDF'.",
-      "Download your secure password-protected file."
+      "Download your secure password-protected file.",
     ],
     faqs: [
       {
         q: "Do you store my password on your servers?",
-        a: "Never. Encryption happens entirely within your web browser using Web Crypto and pdf-lib. We never see or store your password or file."
-      }
+        a: "Never. Encryption happens entirely within your web browser using Web Crypto and pdf-lib. We never see or store your password or file.",
+      },
+      {
+        q: "How do I password protect a PDF online?",
+        a: "Upload your PDF, enter a password, click Encrypt & Protect PDF. The encrypted file downloads immediately â€” no data ever reaches our servers.",
+      },
+      {
+        q: "What type of encryption is used?",
+        a: "PDFpadar uses AES-128 PDF owner and user password encryption via the pdf-lib library, which is compatible with all major PDF readers including Adobe Acrobat.",
+      },
     ],
-    related: ["unlock-pdf", "pdf-metadata", "add-watermark", "merge-pdf"]
+    related: ["unlock-pdf", "pdf-metadata", "add-watermark", "merge-pdf"],
   },
   {
     slug: "unlock-pdf",
     category: "pdf",
     name: "Unlock PDF",
     shortDesc: "Remove password protection from authorized PDFs so you don't have to enter the password repeatedly.",
+    intro: "Remove password restrictions from PDFs you own. Provide the existing password, and PDFpadar saves a new unencrypted copy â€” 100% client-side, your credentials never leave your device.",
     icon: "Unlock",
     badge: "100% Client-Side",
     accept: ".pdf,application/pdf",
@@ -302,27 +368,32 @@ export const TOOLS = [
       "Remove password restriction from authorized documents",
       "Produces an unencrypted, open PDF",
       "100% in-browser decryption",
-      "Private and compliant"
+      "Private and compliant",
     ],
     instructions: [
       "Upload your password-protected PDF.",
       "Enter the existing valid document password.",
       "Click 'Unlock & Remove Password'.",
-      "Download your decrypted, password-free PDF."
+      "Download your decrypted, password-free PDF.",
     ],
     faqs: [
       {
         q: "Can this crack an unknown password?",
-        a: "No. For legal and ethical compliance, you must provide the authorized password to decrypt and re-save the document without protection."
-      }
+        a: "No. For legal and ethical compliance, you must provide the authorized password to decrypt and re-save the document without protection.",
+      },
+      {
+        q: "How do I remove password from a PDF online?",
+        a: "Upload your locked PDF, enter the correct password, and click Unlock & Remove Password. Download the unrestricted copy instantly.",
+      },
     ],
-    related: ["protect-pdf", "pdf-metadata", "merge-pdf", "split-pdf"]
+    related: ["protect-pdf", "pdf-metadata", "merge-pdf", "split-pdf"],
   },
   {
     slug: "pdf-metadata",
     category: "pdf",
     name: "PDF Metadata Editor",
     shortDesc: "View and edit PDF Title, Author, Subject, Keywords, Creator, and Producer properties.",
+    intro: "Inspect hidden metadata inside PDF files and modify or erase it for privacy before sharing. Remove author names, software version strings, and other embedded tracking properties.",
     icon: "FileText",
     badge: "100% Client-Side",
     accept: ".pdf,application/pdf",
@@ -332,27 +403,36 @@ export const TOOLS = [
       "Inspect embedded document metadata",
       "Modify or wipe Title, Author, Subject, and Keywords",
       "Strip sensitive personal identifying metadata",
-      "Instant client-side update"
+      "Instant client-side update",
     ],
     instructions: [
       "Upload your PDF file.",
       "Review the detected metadata fields.",
       "Edit the values or click 'Clear All Metadata' to wipe them for privacy.",
-      "Click 'Save Updated PDF' and download."
+      "Click 'Save Updated PDF' and download.",
     ],
     faqs: [
       {
         q: "Why should I edit or clear PDF metadata?",
-        a: "PDF files often contain hidden information such as author names, software versions, and local file paths. Clearing it protects your privacy before sharing files publicly."
-      }
+        a: "PDF files often contain hidden information such as author names, software versions, and local file paths. Clearing it protects your privacy before sharing files publicly.",
+      },
+      {
+        q: "What metadata can I edit in a PDF?",
+        a: "You can view and edit Title, Author, Subject, Keywords, Creator, and Producer fields. These are the standard XMP/DocInfo properties embedded in every PDF.",
+      },
+      {
+        q: "How do I remove author name from a PDF?",
+        a: "Open PDF Metadata Editor, upload your file, clear the Author field or click Clear All Metadata, then save the updated PDF.",
+      },
     ],
-    related: ["protect-pdf", "add-watermark", "document-page-counter", "merge-pdf"]
+    related: ["protect-pdf", "add-watermark", "document-page-counter", "merge-pdf"],
   },
   {
     slug: "pdf-page-size",
     category: "pdf",
     name: "PDF Page Size Converter",
     shortDesc: "Resize PDF page dimensions to standard A4, US Letter, or Legal formats with content scaling.",
+    intro: "Standardize your PDF to A4, US Letter, or Legal page sizes. Useful when merging documents from different sources that have mixed page dimensions.",
     icon: "Maximize2",
     badge: "100% Client-Side",
     accept: ".pdf,application/pdf",
@@ -362,27 +442,32 @@ export const TOOLS = [
       "Convert to A4 (210 x 297 mm)",
       "Convert to US Letter (8.5 x 11 in)",
       "Convert to US Legal (8.5 x 14 in)",
-      "Uniform page dimension standardization"
+      "Uniform page dimension standardization",
     ],
     instructions: [
       "Upload your PDF.",
       "Select your target page size (A4, Letter, Legal).",
       "Click 'Resize Pages'.",
-      "Download your standardized PDF."
+      "Download your standardized PDF.",
     ],
     faqs: [
       {
         q: "Will this fix PDFs with mismatched page sizes?",
-        a: "Yes! If your PDF has mixed landscape and portrait or irregular scan dimensions, this tool standardizes all pages to your selected size."
-      }
+        a: "Yes! If your PDF has mixed landscape and portrait or irregular scan dimensions, this tool standardizes all pages to your selected size.",
+      },
+      {
+        q: "How do I convert a PDF to A4 size online?",
+        a: "Upload your PDF, select A4 from the page size options, and click Resize Pages. All pages are scaled and padded to 210Ã—297 mm.",
+      },
     ],
-    related: ["rotate-pdf", "add-page-numbers", "merge-pdf", "organize-pdf"]
+    related: ["rotate-pdf", "add-page-numbers", "merge-pdf", "organize-pdf"],
   },
   {
     slug: "jpg-to-pdf",
     category: "pdf",
     name: "JPG to PDF Converter",
     shortDesc: "Convert JPG and JPEG images into a clean, professional multi-page PDF document.",
+    intro: "Convert one or multiple JPG photos into a PDF document instantly. Perfect for scanning receipts, creating photo books, or submitting image-based forms as a PDF.",
     icon: "FileImage",
     badge: "100% Client-Side",
     accept: ".jpg,.jpeg,image/jpeg",
@@ -392,27 +477,36 @@ export const TOOLS = [
       "Convert multiple JPGs into one PDF",
       "Maintains original photo resolution",
       "Auto page sizing to match photo aspect ratios",
-      "Completely local browser conversion"
+      "Completely local browser conversion",
     ],
     instructions: [
       "Upload or drag & drop one or more JPG files.",
       "Re-order photos if you uploaded multiple files.",
       "Click 'Convert to PDF'.",
-      "Download your newly created PDF."
+      "Download your newly created PDF.",
     ],
     faqs: [
       {
         q: "Can I combine multiple photos into a single PDF book?",
-        a: "Yes! Upload all your photos, order them, and they will be stitched into a sequential multi-page PDF."
-      }
+        a: "Yes! Upload all your photos, order them, and they will be stitched into a sequential multi-page PDF.",
+      },
+      {
+        q: "How do I convert JPG to PDF online for free?",
+        a: "Open the JPG to PDF tool, upload your JPEG files, click Convert to PDF, and download the result. No registration or payment required.",
+      },
+      {
+        q: "Does the PDF keep the original image quality?",
+        a: "Yes. The JPEG data is embedded into the PDF without re-compression, preserving all original detail and resolution.",
+      },
     ],
-    related: ["png-to-pdf", "merge-pdf", "image-to-pdf", "compress-image"]
+    related: ["png-to-pdf", "merge-pdf", "image-to-pdf", "compress-image"],
   },
   {
     slug: "png-to-pdf",
     category: "pdf",
     name: "PNG to PDF Converter",
     shortDesc: "Convert high-quality PNG graphics and transparent images into a crisp PDF document.",
+    intro: "Convert PNG images â€” including transparent backgrounds â€” into a clean PDF. Ideal for diagrams, screenshots, logos, and infographics that need to be shared as a document.",
     icon: "FileImage",
     badge: "100% Client-Side",
     accept: ".png,image/png",
@@ -422,21 +516,25 @@ export const TOOLS = [
       "Convert PNGs to crisp vector-wrapped PDF pages",
       "Preserves sharpness of graphics and diagrams",
       "Batch multiple PNGs into one PDF",
-      "Fast in-browser conversion"
+      "Fast in-browser conversion",
     ],
     instructions: [
       "Upload one or more PNG files.",
       "Organize the page order.",
       "Click 'Convert to PDF'.",
-      "Download your generated PDF."
+      "Download your generated PDF.",
     ],
     faqs: [
       {
         q: "Does it support transparent PNGs?",
-        a: "Yes! Transparent PNG backgrounds are rendered cleanly onto white PDF canvas pages."
-      }
+        a: "Yes! Transparent PNG backgrounds are rendered cleanly onto white PDF canvas pages.",
+      },
+      {
+        q: "How do I convert PNG to PDF online free?",
+        a: "Upload your PNG files in the PNG to PDF tool, arrange them if needed, click Convert to PDF, and download instantly.",
+      },
     ],
-    related: ["jpg-to-pdf", "image-to-pdf", "convert-image", "merge-pdf"]
+    related: ["jpg-to-pdf", "image-to-pdf", "convert-image", "merge-pdf"],
   },
 
   // --- IMAGE TOOLS ---
@@ -445,6 +543,7 @@ export const TOOLS = [
     category: "image",
     name: "Image Compressor",
     shortDesc: "Compress JPG, PNG, and WebP images to drastically reduce file size with optimal visual quality.",
+    intro: "Reduce image file sizes by up to 80% without noticeable quality loss. Ideal for website optimization, email attachments, and social media uploads. Runs entirely in your browser.",
     icon: "Minimize2",
     badge: "100% Client-Side",
     accept: "image/jpeg,image/png,image/webp",
@@ -454,31 +553,44 @@ export const TOOLS = [
       "Adjustable compression quality slider (1% to 100%)",
       "Side-by-side original vs compressed file size preview",
       "Percentage savings calculation",
-      "Zero server uploads — 100% private"
+      "Zero server uploads â€” 100% private",
     ],
     instructions: [
       "Upload your image (JPEG, PNG, or WebP).",
       "Adjust the quality slider to find your desired balance between file size and sharpness.",
       "Review the estimated savings in real-time.",
-      "Click 'Download Compressed Image'."
+      "Click 'Download Compressed Image'.",
     ],
     faqs: [
       {
         q: "How does browser-side image compression work?",
-        a: "Your browser's HTML5 Canvas engine and native hardware-accelerated image decoders re-encode the image at your specified quality level directly in memory."
+        a: "Your browser's HTML5 Canvas engine and native hardware-accelerated image decoders re-encode the image at your specified quality level directly in memory.",
       },
       {
         q: "What is the recommended quality setting?",
-        a: "A quality setting between 70% and 80% typically reduces file size by 60-80% with virtually indistinguishable visual difference."
-      }
+        a: "A quality setting between 70% and 80% typically reduces file size by 60-80% with virtually indistinguishable visual difference.",
+      },
+      {
+        q: "How do I compress an image without losing quality?",
+        a: "Use a quality setting of 80â€“85%. At this level, the human eye cannot detect any difference from the original, while file size typically drops by 50â€“70%.",
+      },
+      {
+        q: "What image formats can I compress?",
+        a: "You can compress JPEG, PNG, and WebP images. For best compression ratios, JPEG and WebP are recommended over PNG.",
+      },
+      {
+        q: "How do I reduce image size for a website?",
+        a: "Upload the image, set quality to 75â€“80%, and download. For web use, also consider converting to WebP for an additional 25â€“35% size reduction.",
+      },
     ],
-    related: ["resize-image", "convert-image", "crop-image", "image-to-pdf"]
+    related: ["resize-image", "convert-image", "crop-image", "image-to-pdf"],
   },
   {
     slug: "resize-image",
     category: "image",
     name: "Image Resizer",
     shortDesc: "Resize image dimensions by exact pixels, percentage, or target width and height.",
+    intro: "Resize images to exact pixel dimensions or by percentage. Lock the aspect ratio to prevent distortion. Perfect for social media, email, and web publishing requirements.",
     icon: "Scaling",
     badge: "100% Client-Side",
     accept: "image/*",
@@ -488,27 +600,40 @@ export const TOOLS = [
       "Resize by exact width and height in pixels",
       "Maintain aspect ratio lock",
       "Preset percentage scaling (25%, 50%, 75%)",
-      "High-quality bicubic canvas resampling"
+      "High-quality bicubic canvas resampling",
     ],
     instructions: [
       "Upload your image.",
       "Enter your desired width or height, or select a scale percentage.",
       "Keep the aspect ratio lock checked to avoid distortion.",
-      "Click 'Resize & Download'."
+      "Click 'Resize & Download'.",
     ],
     faqs: [
       {
         q: "Does resizing distort my image?",
-        a: "Not if the aspect ratio lock is enabled. Changing the width automatically adjusts the height proportionately."
-      }
+        a: "Not if the aspect ratio lock is enabled. Changing the width automatically adjusts the height proportionately.",
+      },
+      {
+        q: "How do I resize an image to a specific size in KB?",
+        a: "Use the Image Compressor tool after resizing to control file size. Resizing to smaller dimensions and then compressing typically achieves target file sizes.",
+      },
+      {
+        q: "How do I resize an image online without losing quality?",
+        a: "Upload the image, enable aspect ratio lock, enter your target width, and download. The bicubic resampling algorithm preserves sharpness during downscaling.",
+      },
+      {
+        q: "What is the maximum image size I can resize?",
+        a: "Up to 50 MB per image. Very large images (above 20 megapixels) may take a few seconds to process depending on your device.",
+      },
     ],
-    related: ["compress-image", "crop-image", "rotate-image", "image-dpi-calculator"]
+    related: ["compress-image", "crop-image", "rotate-image", "image-dpi-calculator"],
   },
   {
     slug: "convert-image",
     category: "image",
     name: "Image Converter",
     shortDesc: "Convert images seamlessly between PNG, JPG, and WebP formats.",
+    intro: "Convert between image formats instantly. Convert to WebP for smaller web file sizes, switch PNG to JPG for compatibility, or JPG to PNG for transparency support.",
     icon: "RefreshCw",
     badge: "100% Client-Side",
     accept: "image/*",
@@ -518,27 +643,44 @@ export const TOOLS = [
       "Convert any image to WebP (next-gen web format)",
       "Convert PNG to JPG or JPG to PNG",
       "Quality selection for lossy formats",
-      "Instant download without waiting in cloud queues"
+      "Instant download without waiting in cloud queues",
     ],
     instructions: [
       "Upload your image.",
       "Choose your desired output format (PNG, JPEG, WebP).",
       "Click 'Convert Image'.",
-      "Download your converted file."
+      "Download your converted file.",
     ],
     faqs: [
       {
         q: "Why should I convert images to WebP?",
-        a: "WebP provides superior compression and quality compared to legacy JPG and PNG, making websites load up to 30% faster."
-      }
+        a: "WebP provides superior compression and quality compared to legacy JPG and PNG, making websites load up to 30% faster.",
+      },
+      {
+        q: "How do I convert PNG to JPG online?",
+        a: "Upload your PNG file, select JPEG as the output format, and click Convert Image. The JPEG downloads instantly.",
+      },
+      {
+        q: "Can I convert JPG to PNG to get a transparent background?",
+        a: "Converting JPG to PNG doesn't add transparency â€” it just changes the container format. JPGs don't store transparency data, so the background stays opaque.",
+      },
+      {
+        q: "What is the difference between JPG and PNG?",
+        a: "JPG uses lossy compression â€” good for photos with many colors. PNG uses lossless compression and supports transparency â€” better for graphics, logos, and diagrams.",
+      },
+      {
+        q: "What is WebP and why is it better?",
+        a: "WebP is a modern image format developed by Google that uses superior compression algorithms, resulting in files 25â€“35% smaller than equivalent JPEG files at the same visual quality.",
+      },
     ],
-    related: ["compress-image", "resize-image", "jpg-to-pdf", "image-to-pdf"]
+    related: ["compress-image", "resize-image", "jpg-to-pdf", "image-to-pdf"],
   },
   {
     slug: "crop-image",
     category: "image",
     name: "Image Cropper",
     shortDesc: "Crop images to custom rectangular dimensions or popular aspect ratios (1:1, 16:9, 4:3).",
+    intro: "Crop images to any size using pixel coordinates or preset aspect ratios. Perfect for Instagram squares, YouTube thumbnails, and profile pictures.",
     icon: "Crop",
     badge: "100% Client-Side",
     accept: "image/*",
@@ -548,57 +690,67 @@ export const TOOLS = [
       "Preset aspect ratios: Square (1:1), 16:9, 4:3, 3:2",
       "Custom pixel coordinate cropping",
       "Live dimension feedback",
-      "Preserves original pixel clarity"
+      "Preserves original pixel clarity",
     ],
     instructions: [
       "Upload your image.",
       "Set your crop coordinates or select an aspect ratio preset.",
       "Click 'Crop & Download'.",
-      "Download your framed image."
+      "Download your framed image.",
     ],
     faqs: [
       {
         q: "Can I crop for Instagram or YouTube thumbnails?",
-        a: "Yes! Use 1:1 for social profile pictures/Instagram posts and 16:9 for YouTube thumbnails or banner graphics."
-      }
+        a: "Yes! Use 1:1 for social profile pictures/Instagram posts and 16:9 for YouTube thumbnails or banner graphics.",
+      },
+      {
+        q: "How do I crop an image to a specific size?",
+        a: "Enter exact pixel coordinates for X, Y, Width, and Height. The tool crops precisely to those dimensions.",
+      },
     ],
-    related: ["resize-image", "rotate-image", "compress-image", "convert-image"]
+    related: ["resize-image", "rotate-image", "compress-image", "convert-image"],
   },
   {
     slug: "rotate-image",
     category: "image",
     name: "Image Rotator & Flip",
-    shortDesc: "Rotate images 90°, 180°, 270° or flip horizontally and vertically.",
+    shortDesc: "Rotate images 90Â°, 180Â°, 270Â° or flip horizontally and vertically.",
+    intro: "Fix sideways or upside-down photos in seconds. Rotate or mirror images using simple click controls â€” no apps or software needed.",
     icon: "RotateCcw",
     badge: "100% Client-Side",
     accept: "image/*",
     multiple: false,
     maxSizeMB: 50,
     features: [
-      "Rotate 90° Clockwise or Counter-Clockwise",
-      "Rotate 180° upside down",
+      "Rotate 90Â° Clockwise or Counter-Clockwise",
+      "Rotate 180Â° upside down",
       "Horizontal flip (mirror) & Vertical flip",
-      "Instant canvas render"
+      "Instant canvas render",
     ],
     instructions: [
       "Upload your image.",
       "Click the rotate or flip buttons to adjust the orientation.",
       "Click 'Save Rotated Image'.",
-      "Download your corrected file."
+      "Download your corrected file.",
     ],
     faqs: [
       {
         q: "Can I fix upside-down smartphone photos?",
-        a: "Yes! Simply upload your photo, click rotate 180° or 90°, and download the corrected orientation."
-      }
+        a: "Yes! Simply upload your photo, click rotate 180Â° or 90Â°, and download the corrected orientation.",
+      },
+      {
+        q: "How do I mirror/flip an image horizontally?",
+        a: "Upload the image and click the Horizontal Flip button. This creates a mirror-image effect instantly.",
+      },
     ],
-    related: ["crop-image", "resize-image", "convert-image", "compress-image"]
+    related: ["crop-image", "resize-image", "convert-image", "compress-image"],
   },
   {
     slug: "image-to-pdf",
     category: "image",
     name: "Image to PDF",
     shortDesc: "Convert single or multiple images (JPG, PNG, WebP) into an organized PDF.",
+    intro: "Turn any combination of JPG, PNG, or WebP images into a single PDF document. Useful for submitting scanned documents, portfolios, or photo collections as a PDF.",
     icon: "Images",
     badge: "100% Client-Side",
     accept: "image/jpeg,image/png,image/webp",
@@ -608,27 +760,32 @@ export const TOOLS = [
       "Supports JPG, PNG, and WebP images",
       "Re-order uploaded images before PDF generation",
       "Custom page fit: Fit to Page or Original Size",
-      "Completely local client-side processing"
+      "Completely local client-side processing",
     ],
     instructions: [
       "Upload one or multiple images.",
       "Re-arrange order if necessary.",
       "Click 'Generate PDF'.",
-      "Download your new PDF document."
+      "Download your new PDF document.",
     ],
     faqs: [
       {
         q: "Can I merge different image formats like JPG and PNG together?",
-        a: "Yes! You can upload mixed JPGs and PNGs, and PDFpadar combines them into a seamless single document."
-      }
+        a: "Yes! You can upload mixed JPGs and PNGs, and PDFpadar combines them into a seamless single document.",
+      },
+      {
+        q: "How do I convert multiple images to one PDF?",
+        a: "Upload all your images, arrange them in the desired order, and click Generate PDF. All images become pages in a single PDF document.",
+      },
     ],
-    related: ["jpg-to-pdf", "png-to-pdf", "merge-pdf", "convert-image"]
+    related: ["jpg-to-pdf", "png-to-pdf", "merge-pdf", "convert-image"],
   },
   {
     slug: "image-dpi-calculator",
     category: "image",
     name: "Image DPI & Print Calculator",
     shortDesc: "Calculate print dimensions in inches and centimeters based on pixel resolution and DPI.",
+    intro: "Find out exactly how large your image will print at any DPI. Essential for photographers, graphic designers, and print shops needing to verify image quality before printing.",
     icon: "Calculator",
     badge: "Interactive Tool",
     accept: "image/*",
@@ -638,27 +795,36 @@ export const TOOLS = [
       "Upload an image to auto-detect pixel dimensions",
       "Calculate print size at 300 DPI (high-res), 150 DPI, 72 DPI (screen)",
       "Reverse calculation: compute required pixels for target print size",
-      "Inches, Centimeters, and Millimeters conversion"
+      "Inches, Centimeters, and Millimeters conversion",
     ],
     instructions: [
       "Upload an image or enter pixel dimensions manually.",
       "Select your desired print DPI (e.g. 300 DPI for standard printing).",
       "View the exact physical print dimensions in inches and centimeters.",
-      "Use the recommendations to verify if your image meets print quality guidelines."
+      "Use the recommendations to verify if your image meets print quality guidelines.",
     ],
     faqs: [
       {
         q: "What DPI is recommended for high-quality printing?",
-        a: "300 DPI (dots per inch) is the industry standard for commercial books, magazines, and crisp photography prints."
-      }
+        a: "300 DPI (dots per inch) is the industry standard for commercial books, magazines, and crisp photography prints.",
+      },
+      {
+        q: "What is DPI and why does it matter for printing?",
+        a: "DPI (dots per inch) measures how many ink dots a printer places per inch of paper. Higher DPI means finer detail. 72 DPI is for screens; 300 DPI is the standard for professional printing.",
+      },
+      {
+        q: "How many pixels do I need for an A4 print at 300 DPI?",
+        a: "An A4 page at 300 DPI requires 2480 Ã— 3508 pixels. Use this calculator to verify your image meets this requirement before sending to print.",
+      },
     ],
-    related: ["resize-image", "compress-image", "image-metadata", "convert-image"]
+    related: ["resize-image", "compress-image", "image-metadata", "convert-image"],
   },
   {
     slug: "image-metadata",
     category: "image",
     name: "Image Metadata & EXIF Viewer",
     shortDesc: "Inspect image properties, resolution, MIME type, file size, and strip metadata for privacy.",
+    intro: "View detailed technical information embedded in your image files. See GPS coordinates, camera settings, timestamps, and more â€” then optionally strip it all for privacy.",
     icon: "Info",
     badge: "100% Client-Side",
     accept: "image/*",
@@ -668,20 +834,28 @@ export const TOOLS = [
       "Inspect width, height, aspect ratio, and color depth",
       "View file size in Bytes, KB, and MB",
       "Strip all embedded EXIF/metadata by re-exporting clean raster",
-      "Total privacy guaranteed"
+      "Total privacy guaranteed",
     ],
     instructions: [
       "Upload your photo or image file.",
       "Review the comprehensive technical metadata table.",
-      "Click 'Download Clean Image' to save a version stripped of tracking data."
+      "Click 'Download Clean Image' to save a version stripped of tracking data.",
     ],
     faqs: [
       {
         q: "Why should I strip metadata before sharing photos online?",
-        a: "Photos taken on smartphones can contain embedded GPS coordinates, device serial numbers, and camera timestamps. Stripping it protects your location and privacy."
-      }
+        a: "Photos taken on smartphones can contain embedded GPS coordinates, device serial numbers, and camera timestamps. Stripping it protects your location and privacy.",
+      },
+      {
+        q: "What is EXIF data in an image?",
+        a: "EXIF (Exchangeable Image File Format) is metadata embedded in photos by cameras and smartphones. It can include GPS location, camera model, shutter speed, ISO, and date/time information.",
+      },
+      {
+        q: "How do I remove GPS location from a photo?",
+        a: "Upload the photo to Image Metadata & EXIF Viewer, review the GPS fields, then click Download Clean Image. The stripped copy has no location data.",
+      },
     ],
-    related: ["file-size-analyzer", "compress-image", "convert-image", "pdf-metadata"]
+    related: ["file-size-analyzer", "compress-image", "convert-image", "pdf-metadata"],
   },
 
   // --- FILE PROCESSING TOOLS ---
@@ -690,6 +864,7 @@ export const TOOLS = [
     category: "file",
     name: "ZIP File Creator",
     shortDesc: "Package multiple files of any type into a compressed .zip archive right in your browser.",
+    intro: "Bundle any combination of files into a ZIP archive without installing software. Great for email attachments, backups, and sharing multiple files as a single download.",
     icon: "Archive",
     badge: "100% Client-Side",
     accept: "*/*",
@@ -699,27 +874,36 @@ export const TOOLS = [
       "Compress any file types (documents, images, videos, audio)",
       "Custom archive naming",
       "Standard DEFLATE compression algorithm",
-      "Zero server upload — 100% private"
+      "Zero server upload â€” 100% private",
     ],
     instructions: [
       "Select or drag & drop multiple files into the box.",
       "Specify your preferred ZIP archive name.",
       "Click 'Create ZIP Archive'.",
-      "Download your bundled .zip file instantly."
+      "Download your bundled .zip file instantly.",
     ],
     faqs: [
       {
         q: "Is there a limit on file types?",
-        a: "No! You can include any combination of files: PDFs, images, docs, code files, spreadsheets, or music."
-      }
+        a: "No! You can include any combination of files: PDFs, images, docs, code files, spreadsheets, or music.",
+      },
+      {
+        q: "How do I create a ZIP file online free?",
+        a: "Upload your files using the ZIP File Creator, name your archive, and click Create ZIP Archive. The bundled .zip downloads instantly.",
+      },
+      {
+        q: "What compression method is used?",
+        a: "PDFpadar uses the DEFLATE algorithm â€” the same compression method used by all standard ZIP utilities â€” for maximum compatibility.",
+      },
     ],
-    related: ["extract-zip", "file-size-analyzer", "batch-file-renaming", "file-hash-generator"]
+    related: ["extract-zip", "file-size-analyzer", "batch-file-renaming", "file-hash-generator"],
   },
   {
     slug: "extract-zip",
     category: "file",
     name: "ZIP File Extractor",
     shortDesc: "Unpack and explore the contents of .zip files without installing desktop software.",
+    intro: "Open and extract files from ZIP archives directly in your browser. View the file list, check sizes, and download individual files or everything at once.",
     icon: "FolderArchive",
     badge: "100% Client-Side",
     accept: ".zip,application/zip,application/x-zip-compressed",
@@ -729,26 +913,31 @@ export const TOOLS = [
       "Inspect ZIP file structure and file list",
       "View individual uncompressed file sizes",
       "Download extracted files individually or together",
-      "Runs locally in browser memory"
+      "Runs locally in browser memory",
     ],
     instructions: [
       "Upload your .zip file.",
       "View the list of all files and folders contained in the archive.",
-      "Click on any file to download it individually, or click 'Extract All'."
+      "Click on any file to download it individually, or click 'Extract All'.",
     ],
     faqs: [
       {
         q: "Are password-protected ZIP archives supported?",
-        a: "Standard unencrypted ZIP archives are fully supported directly in the browser."
-      }
+        a: "Standard unencrypted ZIP archives are fully supported directly in the browser.",
+      },
+      {
+        q: "How do I open a ZIP file online without WinZip?",
+        a: "Upload your .zip to the ZIP File Extractor. The tool lists all contents and lets you download files individually or extract everything â€” no software required.",
+      },
     ],
-    related: ["create-zip", "file-size-analyzer", "file-hash-generator", "file-comparison"]
+    related: ["create-zip", "file-size-analyzer", "file-hash-generator", "file-comparison"],
   },
   {
     slug: "file-hash-generator",
     category: "file",
     name: "File Hash Generator",
     shortDesc: "Calculate SHA-256, SHA-1, SHA-384, and SHA-512 cryptographic checksums for any file.",
+    intro: "Generate cryptographic hash fingerprints for any file to verify integrity and detect tampering. Uses the browser's native Web Crypto API â€” fast, private, and accurate.",
     icon: "Fingerprint",
     badge: "Web Crypto API",
     accept: "*/*",
@@ -758,27 +947,36 @@ export const TOOLS = [
       "Computes SHA-256, SHA-1, SHA-384, and SHA-512",
       "Native hardware-accelerated Web Crypto API",
       "One-click copy to clipboard",
-      "Verify file integrity and detect tampering"
+      "Verify file integrity and detect tampering",
     ],
     instructions: [
       "Upload any file from your computer.",
       "The tool calculates the cryptographic hash fingerprints automatically.",
       "Click the copy icon next to any hash to copy it to your clipboard.",
-      "Compare with the expected hash to verify file authenticity."
+      "Compare with the expected hash to verify file authenticity.",
     ],
     faqs: [
       {
         q: "What is a file hash used for?",
-        a: "A file hash is a unique digital fingerprint. If a file is modified by even one byte, its hash changes completely. It is commonly used to verify downloads and detect corruption."
-      }
+        a: "A file hash is a unique digital fingerprint. If a file is modified by even one byte, its hash changes completely. It is commonly used to verify downloads and detect corruption.",
+      },
+      {
+        q: "How do I verify a file's SHA-256 checksum?",
+        a: "Upload the file to the File Hash Generator. It displays the SHA-256 hash. Compare it character-by-character with the hash published by the original source to confirm the file is unmodified.",
+      },
+      {
+        q: "What is the difference between SHA-1 and SHA-256?",
+        a: "SHA-256 is more secure and collision-resistant than SHA-1. SHA-1 is considered cryptographically weak for security applications, while SHA-256 remains the current standard for file integrity verification.",
+      },
     ],
-    related: ["file-comparison", "file-size-analyzer", "create-zip", "image-metadata"]
+    related: ["file-comparison", "file-size-analyzer", "create-zip", "image-metadata"],
   },
   {
     slug: "file-comparison",
     category: "file",
     name: "File Comparison Utility",
     shortDesc: "Compare two text, code, or data files side-by-side to highlight additions, deletions, and differences.",
+    intro: "Find exactly what changed between two files. View additions in green and deletions in red with a clear diff report. Works with any plain-text format.",
     icon: "GitCompare",
     badge: "100% Client-Side",
     accept: "text/*,.txt,.json,.csv,.js,.html,.css,.md,.xml,.py",
@@ -788,26 +986,31 @@ export const TOOLS = [
       "Side-by-side line difference comparison",
       "Highlights additions in green and removals in red",
       "Line count and difference summary statistics",
-      "Ideal for code, JSON, CSV, and text drafts"
+      "Ideal for code, JSON, CSV, and text drafts",
     ],
     instructions: [
       "Upload File A (Original) and File B (Modified), or paste text directly.",
       "Click 'Compare Files'.",
-      "Review the visual diff report highlighting changes and line counts."
+      "Review the visual diff report highlighting changes and line counts.",
     ],
     faqs: [
       {
         q: "Can I compare code files like JSON, JavaScript, or Markdown?",
-        a: "Yes! Any plain-text based format (JSON, CSV, MD, JS, HTML, TXT, XML) can be compared instantly."
-      }
+        a: "Yes! Any plain-text based format (JSON, CSV, MD, JS, HTML, TXT, XML) can be compared instantly.",
+      },
+      {
+        q: "How do I compare two text files online?",
+        a: "Upload File A and File B, then click Compare Files. The tool produces a color-coded diff showing every addition and deletion.",
+      },
     ],
-    related: ["file-hash-generator", "file-size-analyzer", "batch-file-renaming", "extract-zip"]
+    related: ["file-hash-generator", "file-size-analyzer", "batch-file-renaming", "extract-zip"],
   },
   {
     slug: "file-size-analyzer",
     category: "file",
     name: "File Size & Format Analyzer",
     shortDesc: "Analyze file properties, byte sizes, human-readable breakdown, MIME types, and storage usage.",
+    intro: "Inspect detailed file properties without uploading anything. Identify MIME types, check exact byte sizes, and compare multiple files side by side in a clear summary table.",
     icon: "PieChart",
     badge: "100% Client-Side",
     accept: "*/*",
@@ -817,26 +1020,31 @@ export const TOOLS = [
       "Detailed byte count, KB, MB, and GB calculations",
       "MIME type and file signature detection",
       "Last modified timestamp inspection",
-      "Batch summary comparison across multiple files"
+      "Batch summary comparison across multiple files",
     ],
     instructions: [
       "Upload one or more files of any format.",
       "View the breakdown of file sizes, formats, and proportions.",
-      "Export or copy the file summary."
+      "Export or copy the file summary.",
     ],
     faqs: [
       {
         q: "Can I inspect multiple files to see which is taking up the most space?",
-        a: "Yes! Upload multiple files and PDFpadar will display an interactive table ranking them by size."
-      }
+        a: "Yes! Upload multiple files and PDFpadar will display an interactive table ranking them by size.",
+      },
+      {
+        q: "How do I find out the exact byte size of a file?",
+        a: "Upload the file to File Size & Format Analyzer. It displays size in bytes, KB, MB, and GB simultaneously.",
+      },
     ],
-    related: ["file-hash-generator", "create-zip", "document-page-counter", "compress-image"]
+    related: ["file-hash-generator", "create-zip", "document-page-counter", "compress-image"],
   },
   {
     slug: "batch-file-renaming",
     category: "file",
     name: "Batch File Renamer",
     shortDesc: "Rename multiple files at once with custom prefixes, suffixes, numbering, or find-and-replace.",
+    intro: "Rename dozens of files in seconds using flexible rules â€” add prefixes, append suffixes, apply sequential numbers, or search-and-replace text in filenames. Download all renamed files in a ZIP.",
     icon: "Tag",
     badge: "100% Client-Side",
     accept: "*/*",
@@ -846,27 +1054,32 @@ export const TOOLS = [
       "Add prefix or suffix to file names",
       "Sequential numbering (e.g., photo_01, photo_02)",
       "Find and replace text in file names",
-      "Download all renamed files bundled in a convenient ZIP"
+      "Download all renamed files bundled in a convenient ZIP",
     ],
     instructions: [
       "Upload the batch of files you want to rename.",
       "Choose your renaming rule (prefix, suffix, numbering pattern, or find/replace).",
       "Preview the before-and-after file names in real-time.",
-      "Click 'Rename & Download ZIP'."
+      "Click 'Rename & Download ZIP'.",
     ],
     faqs: [
       {
         q: "Does renaming change the content inside my files?",
-        a: "No. The file contents remain 100% untouched and identical; only the filenames in the ZIP bundle are updated."
-      }
+        a: "No. The file contents remain 100% untouched and identical; only the filenames in the ZIP bundle are updated.",
+      },
+      {
+        q: "How do I batch rename files online?",
+        a: "Upload your files, select your renaming pattern (prefix, suffix, or find/replace), preview the changes, and download a ZIP with all renamed files.",
+      },
     ],
-    related: ["create-zip", "extract-zip", "file-size-analyzer", "file-comparison"]
+    related: ["create-zip", "extract-zip", "file-size-analyzer", "file-comparison"],
   },
   {
     slug: "document-page-counter",
     category: "file",
     name: "Document Page Counter",
     shortDesc: "Count total pages across multiple PDF documents instantly without uploading.",
+    intro: "Quickly count the total number of pages in one or many PDF files. PDFpadar reads only the page-tree structure â€” not the full content â€” making it fast even for large documents.",
     icon: "BookOpen",
     badge: "100% Client-Side",
     accept: ".pdf,application/pdf",
@@ -876,23 +1089,26 @@ export const TOOLS = [
       "Instant page count detection per document",
       "Total aggregate page count sum across all files",
       "Fast header inspection without full document rendering",
-      "100% private in browser"
+      "100% private in browser",
     ],
     instructions: [
       "Upload one or several PDF files.",
       "View the individual page counts and total combined pages immediately.",
-      "Export or copy the document count summary."
+      "Export or copy the document count summary.",
     ],
     faqs: [
       {
         q: "Can this count pages in hundreds of documents at once?",
-        a: "Yes! PDFpadar parses only the page-tree catalog headers of your PDFs, making page counting virtually instantaneous even for large batches."
-      }
+        a: "Yes! PDFpadar parses only the page-tree catalog headers of your PDFs, making page counting virtually instantaneous even for large batches.",
+      },
+      {
+        q: "How do I count pages in a PDF online?",
+        a: "Upload your PDF files to the Document Page Counter. Each file's page count displays immediately with a running total.",
+      },
     ],
-    related: ["merge-pdf", "split-pdf", "pdf-metadata", "file-size-analyzer"]
-  }
+    related: ["merge-pdf", "split-pdf", "pdf-metadata", "file-size-analyzer"],
+  },
 ];
-
 export const getToolBySlug = (slug) => TOOLS.find((t) => t.slug === slug);
 export const getToolsByCategory = (cat) => TOOLS.filter((t) => t.category === cat);
 export const getRelatedTools = (slug) => {

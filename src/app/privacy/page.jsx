@@ -3,8 +3,15 @@ import Breadcrumb from "@/components/Breadcrumb";
 import { ShieldCheck, Lock, CheckCircle2 } from "lucide-react";
 
 export const metadata = {
-  title: "Privacy Policy | PDFpadar — 100% Client-Side File Processing",
-  description: "Learn how PDFpadar protects your privacy. All PDF and file processing happens directly on your device with zero server storage.",
+  title: "Privacy Policy — How PDFpadar Protects Your Files",
+  description: "PDFpadar processes all files 100% in your browser. Zero server uploads, zero data storage, zero tracking. Read our full privacy policy to understand how your files stay private.",
+  alternates: { canonical: "https://pdfpadar.com/privacy" },
+  openGraph: {
+    title: "Privacy Policy — PDFpadar",
+    description: "All file processing happens locally in your browser. Your files never leave your device.",
+    url: "https://pdfpadar.com/privacy",
+    siteName: "PDFpadar",
+  },
 };
 
 export default function PrivacyPage() {
