@@ -792,6 +792,28 @@ Calculated at: ${new Date().toLocaleString()}
     }
   };
 
+  const TOOLS_WITH_SETTINGS = new Set([
+    "split-pdf",
+    "rotate-pdf",
+    "delete-pdf-pages",
+    "extract-pdf-pages",
+    "organize-pdf",
+    "add-watermark",
+    "add-page-numbers",
+    "protect-pdf",
+    "unlock-pdf",
+    "pdf-metadata",
+    "pdf-page-size",
+    "compress-image",
+    "resize-image",
+    "convert-image",
+    "crop-image",
+    "rotate-image",
+    "image-dpi-calculator",
+    "create-zip",
+    "batch-file-renaming",
+  ]);
+
   return (
     <div className="w-full bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-slate-800 shadow-sm">
       <div className="space-y-6">
@@ -812,8 +834,8 @@ Calculated at: ${new Date().toLocaleString()}
           title={tool.multiple ? `Drop ${tool.name} files here` : `Drop your ${tool.name} file here`}
         />
 
-        {/* Configuration State (When files are selected) */}
-        {files.length > 0 && !result && (
+        {/* Configuration State (Only shown for tools that have settings) */}
+        {files.length > 0 && !result && TOOLS_WITH_SETTINGS.has(tool.slug) && (
           <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-4">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
               <Sliders className="w-4 h-4 text-brand-500" />
