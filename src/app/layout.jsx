@@ -29,6 +29,19 @@ export const metadata = {
     "private PDF tools",
     "no upload PDF tool",
     "in-browser file processing",
+    "merge pdf without uploading",
+    "split pdf without uploading",
+    "compress image without uploading",
+    "client side pdf metadata remover",
+    "remove exif data without upload",
+    "in-browser file hash generator",
+    "free pdf tool that doesn't upload files",
+    "zero upload pdf editor",
+    "offline browser pdf tools",
+    "private image converter no server",
+    "local browser zip archive",
+    "password protect pdf without upload",
+    "100% client-side file tools",
   ],
   authors: [{ name: "PDFpadar", url: BASE_URL }],
   creator: "PDFpadar",
@@ -127,11 +140,36 @@ export default function RootLayout({ children }) {
         description:
           "Free online PDF, image & file processing tools. 100% client-side. No uploads required.",
         publisher: { "@id": `${BASE_URL}/#organization` },
-        potentialAction: {
-          "@type": "SearchAction",
-          target: { "@type": "EntryPoint", urlTemplate: `${BASE_URL}/?q={search_term_string}` },
-          "query-input": "required name=search_term_string",
-        },
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${BASE_URL}/#faq`,
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: "What is a free PDF tool that doesn't upload my files?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "PDFpadar is a free, 100% client-side PDF, image, and file utility suite. All merging, splitting, watermarking, encryption, image compression, EXIF removal, and SHA-256 hashing run locally in your browser memory—your files are never uploaded to any server.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "How does client-side file processing work?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Traditional web tools upload your files to remote cloud servers. PDFpadar executes all PDF manipulation, HTML5 Canvas image processing, ZIP archiving, and Web Crypto hashing locally inside your web browser so your files never leave your device.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "Are my confidential legal documents and photos safe?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Yes. Because zero files are transmitted over the internet to any backend server, it is architecturally impossible for PDFpadar or third parties to access, store, or view your documents or photos.",
+            },
+          },
+        ],
       },
     ],
   };

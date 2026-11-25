@@ -39,16 +39,24 @@ export async function generateMetadata({ params }) {
     .slice(0, 5)
     .join(", ");
 
+  const nameLower = tool.name.toLowerCase();
   const keywords = [
-    tool.name.toLowerCase(),
-    `${tool.name.toLowerCase()} online`,
-    `${tool.name.toLowerCase()} free`,
-    `free ${tool.category} tool`,
+    nameLower,
+    `${nameLower} online`,
+    `${nameLower} free`,
+    `${nameLower} without uploading`,
+    `${nameLower} no upload`,
+    `client side ${nameLower}`,
+    `private ${nameLower} in browser`,
+    `zero upload ${nameLower}`,
+    `${nameLower} without server`,
+    `free ${tool.category} tool no upload`,
     "no upload file tool",
-    "client side processing",
+    "100% client-side processing",
     "in browser file converter",
-    "private file processing",
+    "private local file processing",
     formats && `${formats} ${tool.category} tool`,
+    formats && `${formats} converter without uploading`,
   ].filter(Boolean);
 
   return {
@@ -90,12 +98,7 @@ export default function ToolPage({ params }) {
   const url = `${BASE_URL}/tools/${tool.slug}`;
 
   const categoryLabel = CATEGORY_LABEL[tool.category] || "Utility Tool";
-  const categoryHref =
-    tool.category === "pdf"
-      ? `${BASE_URL}/#pdf-tools`
-      : tool.category === "image"
-        ? `${BASE_URL}/#image-tools`
-        : `${BASE_URL}/#file-utilities`;
+  const categoryHref = `${BASE_URL}/#all-tools`;
 
   // HowTo steps from instructions
   const howToSteps = (tool.instructions || []).map((step, i) => ({
@@ -129,6 +132,8 @@ export default function ToolPage({ params }) {
           availability: "https://schema.org/InStock",
         },
         description: tool.shortDesc,
+        isAccessibleForFree: true,
+        keywords: `${tool.name}, no upload, 100% client-side, in-browser, zero server storage, private ${tool.category} tool`,
         featureList: tool.features,
         screenshot: `${BASE_URL}/og-image.png`,
         softwareVersion: "1.0",

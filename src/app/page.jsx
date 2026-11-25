@@ -36,8 +36,12 @@ export default function HomePage() {
 
   const globalFaqs = [
     {
+      q: "What is a free PDF tool that doesn't upload my files?",
+      a: "PDFpadar is a free, 100% client-side PDF, image, and file processing suite. Every tool—including PDF merging, splitting, watermarking, encryption, image compression, EXIF removal, and SHA-256 hashing—runs locally inside your web browser with zero server uploads."
+    },
+    {
       q: "How does client-side file processing work?",
-      a: "Traditional web tools require you to upload your files to remote cloud servers to process them. PDFpadar compiles high-performance engines directly into JavaScript and WebAssembly, executing all PDF parsing, image canvas resizing, and cryptographic hashing locally inside your web browser. Your files never leave your device."
+      a: "Traditional web tools require you to upload your files to remote cloud servers to process them. PDFpadar executes all PDF parsing, HTML5 Canvas image processing, ZIP archiving, and Web Crypto hashing locally inside your web browser. Your files never leave your device."
     },
     {
       q: "Is PDFpadar completely free?",
@@ -146,7 +150,7 @@ export default function HomePage() {
       )}
 
       {/* 4. Filtered / All Tools Grid Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <section id="all-tools" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
           <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <Layers className="w-5 h-5 text-brand-500" />
