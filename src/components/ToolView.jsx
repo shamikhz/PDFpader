@@ -162,6 +162,14 @@ export default function ToolView({ tool }) {
     document.body.removeChild(a);
   };
 
+  const triggerBatchDownloads = (entries) => {
+    entries.forEach((entry, index) => {
+      setTimeout(() => {
+        triggerDownload(entry.url, entry.name);
+      }, index * 150);
+    });
+  };
+
   const copyToClipboard = (text, key) => {
     navigator.clipboard.writeText(text);
     setCopiedKey(key);
@@ -719,9 +727,23 @@ Calculated at: ${new Date().toLocaleString()}
       } else if (slug === "file-hash-generator") {
         const { calculateFileHashes } = await getFile();
         const hashData = await calculateFileHashes(files[0], setProgress);
+        const hashLines = [
+          "PDFpadar — File Cryptographic Checksum Report",
+          `File: ${hashData.fileName}`,
+          `Size: ${formatBytes(hashData.fileSize)} (${hashData.fileSize} bytes)`,
+          `Generated at: ${new Date().toLocaleString()}`,
+          "",
+          ...Object.entries(hashData.hashes).map(([algo, hash]) => `${algo}: ${hash}`),
+          "",
+        ].join("\n");
+        const blob = new Blob([hashLines], { type: "text/plain" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "hashes",
           hashData,
+          url,
+          filename: `${files[0].name.replace(/\.[^/.]+$/, "")}_checksums.txt`,
+          size: blob.size,
         });
       } else if (slug === "file-comparison") {
         if (files.length < 2) {
@@ -730,17 +752,48 @@ Calculated at: ${new Date().toLocaleString()}
         const { compareTextFiles } = await getFile();
         const diff = await compareTextFiles(files[0], files[1]);
         setProgress(100);
+        const diffReport = [
+          "PDFpadar — File Comparison Diff Report",
+          `File A: ${diff.fileAName} (${diff.totalLinesA} lines)`,
+          `File B: ${diff.fileBName} (${diff.totalLinesB} lines)`,
+          `Status: ${diff.identical ? "Files are Identical" : `${diff.differencesCount} line difference(s) detected`}`,
+          `Generated at: ${new Date().toLocaleString()}`,
+          "",
+          ...diff.diffLines.map((line) =>
+            line.type === "diff"
+              ? `[DIFF L${line.lineNum}]\n  - ${line.left ?? "(none)"}\n  + ${line.right ?? "(none)"}`
+              : `[SAME L${line.lineNum}] ${line.left ?? ""}`
+          ),
+          "",
+        ].join("\n");
+        const blob = new Blob([diffReport], { type: "text/plain" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "diff",
           diff,
+          url,
+          filename: `diff_${files[0].name.replace(/\.[^/.]+$/, "")}_vs_${files[1].name.replace(/\.[^/.]+$/, "")}.txt`,
+          size: blob.size,
         });
       } else if (slug === "file-size-analyzer") {
         const { analyzeFiles } = await getFile();
         const analysis = analyzeFiles(files);
         setProgress(100);
+        const csvEscape = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+        const csvRows = [
+          ["File Name", "Formatted Size", "Size (Bytes)", "Share", "MIME Type", "Last Modified"].map(csvEscape).join(","),
+          ...analysis.fileStats.map((f) =>
+            [f.name, f.formattedSize, f.sizeBytes, f.percentageOfTotal, f.type, f.lastModified].map(csvEscape).join(",")
+          ),
+        ].join("\n");
+        const blob = new Blob([csvRows], { type: "text/csv;charset=utf-8" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "file-analysis",
           analysis,
+          url,
+          filename: "file_size_analysis.csv",
+          size: blob.size,
         });
       } else if (slug === "batch-file-renaming") {
         const { batchRenameFiles } = await getFile();
@@ -778,10 +831,21 @@ Calculated at: ${new Date().toLocaleString()}
           total += count;
           setProgress(Math.round(((i + 1) / files.length) * 100));
         }
+        const csvEscape = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+        const csvRows = [
+          ["Document Name", "Pages"].map(csvEscape).join(","),
+          ...counts.map((c) => [c.name, c.pages].map(csvEscape).join(",")),
+          ["Total", total].map(csvEscape).join(","),
+        ].join("\n");
+        const blob = new Blob([csvRows], { type: "text/csv;charset=utf-8" });
+        const url = registerUrl(URL.createObjectURL(blob));
         setResult({
           type: "page-count",
           counts,
           total,
+          url,
+          filename: "document_page_counts.csv",
+          size: blob.size,
         });
       }
     } catch (err) {
@@ -1620,6 +1684,16 @@ Calculated at: ${new Date().toLocaleString()}
                 <span>Download {result.filename || "Processed Output"}</span>
               </a>
             )}
+            {!result.url && result.type === "zip-entries" && result.entries?.length > 0 && (
+              <button
+                type="button"
+                onClick={() => triggerBatchDownloads(result.entries)}
+                className="flex-1 min-w-[240px] flex items-center justify-center gap-2.5 py-4 px-6 rounded-2xl font-black text-white bg-brand-600 hover:bg-brand-500 shadow-lg shadow-brand-600/30 hover:scale-[1.01] active:scale-[0.99] transition-all text-base focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/30"
+              >
+                <Download className="w-5 h-5" />
+                <span>Download All ({result.entries.length} Files)</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={handleReset}
@@ -1638,7 +1712,11 @@ Calculated at: ${new Date().toLocaleString()}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-brand-600 dark:text-brand-400 font-bold text-sm">
               <CheckCircle2 className="w-5 h-5" />
-              <span>Processing Complete! Download Ready</span>
+              <span>
+                {result.url || (result.type === "zip-entries" && result.entries?.length > 0)
+                  ? "Processing Complete! Download Ready"
+                  : "Processing Complete!"}
+              </span>
             </div>
             <button
               type="button"
@@ -1884,9 +1962,21 @@ Calculated at: ${new Date().toLocaleString()}
           {/* Cryptographic Hashes Output */}
                     {result.type === "hashes" && (
                       <div className="space-y-3">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                          Calculated Fingerprints for &quot;{result.hashData.fileName}&quot;
-                        </h4>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Calculated Fingerprints for &quot;{result.hashData.fileName}&quot;
+                          </h4>
+                          {result.url && (
+                            <a
+                              href={result.url}
+                              download={sanitizeFilename(result.filename, "checksums.txt")}
+                              className="inline-flex items-center gap-1.5 py-2 px-3.5 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-sm transition-all text-xs"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>Download Checksums (.txt)</span>
+                            </a>
+                          )}
+                        </div>
                         <div className="space-y-2">
                           {Object.entries(result.hashData.hashes).map(([algo, hash]) => (
                             <div
@@ -1927,9 +2017,26 @@ Calculated at: ${new Date().toLocaleString()}
                     {/* Extracted ZIP Entries */}
                     {result.type === "zip-entries" && (
                       <div className="space-y-3">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                          Extracted Files from &quot;{result.zipFileName}&quot; ({result.entries.length})
-                        </h4>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Extracted Files from &quot;{result.zipFileName}&quot; ({result.entries.length})
+                          </h4>
+                          {result.entries.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => triggerBatchDownloads(result.entries)}
+                              className="inline-flex items-center gap-1.5 py-2 px-3.5 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-sm transition-all text-xs"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>Extract All ({result.entries.length})</span>
+                            </button>
+                          )}
+                        </div>
+                        {result.entries.length === 0 && (
+                          <p className="text-xs text-slate-500 dark:text-slate-400 p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                            No files found inside this ZIP archive.
+                          </p>
+                        )}
                         <div className="space-y-2 max-h-72 overflow-y-auto">
                           {result.entries.map((entry, idx) => (
                             <div
@@ -1987,6 +2094,18 @@ Calculated at: ${new Date().toLocaleString()}
                             </div>
                           ))}
                         </div>
+                        {result.url && (
+                          <div className="flex justify-end pt-2">
+                            <a
+                              href={result.url}
+                              download={sanitizeFilename(result.filename, "diff_report.txt")}
+                              className="inline-flex items-center gap-2 py-3 px-5 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-sm transition-all text-xs"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>Download Diff Report (.txt)</span>
+                            </a>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -2036,6 +2155,18 @@ Calculated at: ${new Date().toLocaleString()}
                             </tbody>
                           </table>
                         </div>
+                        {result.url && (
+                          <div className="flex justify-end pt-2">
+                            <a
+                              href={result.url}
+                              download={sanitizeFilename(result.filename, "file_size_analysis.csv")}
+                              className="inline-flex items-center gap-2 py-3 px-5 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-sm transition-all text-xs"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>Download Analysis Report (.csv)</span>
+                            </a>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -2107,6 +2238,18 @@ Calculated at: ${new Date().toLocaleString()}
                             </div>
                           ))}
                         </div>
+                        {result.url && (
+                          <div className="flex justify-end pt-2">
+                            <a
+                              href={result.url}
+                              download={sanitizeFilename(result.filename, "document_page_counts.csv")}
+                              className="inline-flex items-center gap-2 py-3 px-5 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-sm transition-all text-xs"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>Download Page Count Report (.csv)</span>
+                            </a>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
