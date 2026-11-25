@@ -59,7 +59,14 @@ export default function ToolView({ tool }) {
   const [pageNumberPos, setPageNumberPos] = useState("bottom-center");
   const [pdfPassword, setPdfPassword] = useState("");
   const [pdfPageSize, setPdfPageSize] = useState("A4");
-  const [pdfMeta, setPdfMeta] = useState({ title: "", author: "", subject: "", keywords: "" });
+  const [pdfMeta, setPdfMeta] = useState({
+    title: "",
+    author: "",
+    subject: "",
+    keywords: "",
+    creator: "",
+    producer: "",
+  });
 
   // Image tool options
   const [imageQuality, setImageQuality] = useState(80);
@@ -67,17 +74,70 @@ export default function ToolView({ tool }) {
   const [resizeHeight, setResizeHeight] = useState("");
   const [maintainAspect, setMaintainAspect] = useState(true);
   const [convertFormat, setConvertFormat] = useState("image/webp");
+  const [cropX, setCropX] = useState(0);
+  const [cropY, setCropY] = useState(0);
   const [cropWidth, setCropWidth] = useState(800);
   const [cropHeight, setCropHeight] = useState(800);
+  const [cropPreset, setCropPreset] = useState("custom");
+  const [imageNaturalSize, setImageNaturalSize] = useState(null);
+  const [imageFlipH, setImageFlipH] = useState(false);
+  const [imageFlipV, setImageFlipV] = useState(false);
   const [imageDpi, setImageDpi] = useState(300);
 
   // File tool options
   const [zipName, setZipName] = useState("bundle.zip");
   const [renameRule, setRenameRule] = useState("prefix");
   const [renamePrefix, setRenamePrefix] = useState("doc_");
-  const [renameSuffix, setRenameSuffix] = useState("");
+  const [renameSuffix, setRenameSuffix] = useState("_v1");
   const [renameFind, setRenameFind] = useState("");
   const [renameReplace, setRenameReplace] = useState("");
+  const [renameStartNum, setRenameStartNum] = useState(1);
+  const [renamePadDigits, setRenamePadDigits] = useState(2);
+
+  // Auto-populate metadata / image dimensions when files are selected
+  useEffect(() => {
+    if (files.length === 0) {
+      setImageNaturalSize(null);
+      return;
+    }
+    let cancelled = false;
+
+    if (tool.slug === "pdf-metadata") {
+      getPdfEngine()
+        .then(({ getPdfMetadata }) => getPdfMetadata(files[0]))
+        .then((meta) => {
+          if (!cancelled) {
+            setPdfMeta({
+              title: meta.title || "",
+              author: meta.author || "",
+              subject: meta.subject || "",
+              keywords: meta.keywords || "",
+              creator: meta.creator || "",
+              producer: meta.producer || "",
+            });
+          }
+        })
+        .catch(() => {});
+    } else if (tool.slug === "crop-image") {
+      getImageEngine()
+        .then(({ loadImage }) => loadImage(files[0]))
+        .then((img) => {
+          if (!cancelled) {
+            setImageNaturalSize({ width: img.naturalWidth, height: img.naturalHeight });
+            setCropX(0);
+            setCropY(0);
+            setCropWidth(img.naturalWidth);
+            setCropHeight(img.naturalHeight);
+            setCropPreset("custom");
+          }
+        })
+        .catch(() => {});
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [files, tool.slug]);
 
   // Memory cleanup on unmount
   useEffect(() => {
@@ -518,7 +578,12 @@ export default function ToolView({ tool }) {
         const { cropImage } = await getImg();
         const cropped = await cropImage(
           files[0],
-          { x: 0, y: 0, width: parseInt(cropWidth, 10), height: parseInt(cropHeight, 10) },
+          {
+            x: parseInt(cropX, 10) || 0,
+            y: parseInt(cropY, 10) || 0,
+            width: parseInt(cropWidth, 10),
+            height: parseInt(cropHeight, 10),
+          },
           setProgress
         );
         const url = registerUrl(cropped.url);
@@ -534,7 +599,13 @@ export default function ToolView({ tool }) {
       } else if (slug === "rotate-image") {
         const { rotateAndFlipImage } = await getImg();
         if (files.length === 1) {
-          const rot = await rotateAndFlipImage(files[0], Number(rotationAngle), false, false, setProgress);
+          const rot = await rotateAndFlipImage(
+            files[0],
+            Number(rotationAngle),
+            imageFlipH,
+            imageFlipV,
+            setProgress
+          );
           const url = registerUrl(rot.url);
           setResult({
             type: "download",
@@ -543,7 +614,7 @@ export default function ToolView({ tool }) {
             filename: `rotated_${files[0].name}`,
             size: rot.blob.size,
             previewUrl: url,
-            message: `Image rotated by ${rotationAngle}°.`,
+            message: `Image rotated by ${rotationAngle}°${imageFlipH ? " + flipped horizontally" : ""}${imageFlipV ? " + flipped vertically" : ""}.`,
           });
         } else {
           const { default: JSZip } = await import("jszip");
@@ -551,7 +622,7 @@ export default function ToolView({ tool }) {
           const items = [];
           for (let i = 0; i < files.length; i++) {
             const f = files[i];
-            const rot = await rotateAndFlipImage(f, Number(rotationAngle), false, false, (p) => {
+            const rot = await rotateAndFlipImage(f, Number(rotationAngle), imageFlipH, imageFlipV, (p) => {
               setProgress(Math.round(((i + p / 100) / files.length) * 100));
             });
             const outName = `rotated_${f.name}`;
@@ -603,9 +674,10 @@ Calculated at: ${new Date().toLocaleString()}
           message: `Calculated print dimensions at ${imageDpi} DPI.`,
         });
       } else if (slug === "image-metadata") {
-        const { getImageMetadata } = await getImg();
+        const { getImageMetadata, stripImageMetadata } = await getImg();
         const meta = await getImageMetadata(files[0]);
-        setProgress(100);
+        const cleaned = await stripImageMetadata(files[0], setProgress);
+        const cleanUrl = registerUrl(cleaned.url);
         const jsonText = JSON.stringify(meta, null, 2);
         const blob = new Blob([jsonText], { type: "application/json" });
         const url = registerUrl(URL.createObjectURL(blob));
@@ -615,6 +687,9 @@ Calculated at: ${new Date().toLocaleString()}
           url,
           filename: `${files[0].name.replace(/\.[^/.]+$/, "")}_metadata.json`,
           size: blob.size,
+          cleanUrl,
+          cleanFilename: `clean_${files[0].name}`,
+          cleanSize: cleaned.size,
           message: `Extracted properties and metadata for ${files[0].name}.`,
         });
       }
@@ -677,6 +752,8 @@ Calculated at: ${new Date().toLocaleString()}
             suffix: renameSuffix,
             findText: renameFind,
             replaceText: renameReplace,
+            startNum: parseInt(renameStartNum, 10) || 1,
+            padDigits: parseInt(renamePadDigits, 10) || 2,
           },
           setProgress
         );
@@ -805,8 +882,23 @@ Calculated at: ${new Date().toLocaleString()}
                     <option value="all">All Pages</option>
                     <option value="odd">Odd Pages Only</option>
                     <option value="even">Even Pages Only</option>
+                    <option value="custom">Custom Page Range</option>
                   </select>
                 </div>
+                {rotationSelection === "custom" && (
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Custom Pages (e.g. 1-3, 5)
+                    </label>
+                    <input
+                      type="text"
+                      value={customRotateRange}
+                      onChange={(e) => setCustomRotateRange(e.target.value)}
+                      placeholder="1-3, 5"
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500"
+                    />
+                  </div>
+                )}
               </div>
             )}
 
@@ -955,30 +1047,101 @@ Calculated at: ${new Date().toLocaleString()}
 
             {/* PDF Metadata Editor */}
             {tool.slug === "pdf-metadata" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Document Title
-                  </label>
-                  <input
-                    type="text"
-                    value={pdfMeta.title}
-                    onChange={(e) => setPdfMeta({ ...pdfMeta, title: e.target.value })}
-                    placeholder="New Title"
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
-                  />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    Edit document properties or clear them for privacy
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPdfMeta({
+                        title: "",
+                        author: "",
+                        subject: "",
+                        keywords: "",
+                        creator: "",
+                        producer: "",
+                      })
+                    }
+                    className="text-xs font-bold text-red-600 dark:text-red-400 hover:underline"
+                  >
+                    Clear All Metadata
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Author
-                  </label>
-                  <input
-                    type="text"
-                    value={pdfMeta.author}
-                    onChange={(e) => setPdfMeta({ ...pdfMeta, author: e.target.value })}
-                    placeholder="Author Name"
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Document Title
+                    </label>
+                    <input
+                      type="text"
+                      value={pdfMeta.title}
+                      onChange={(e) => setPdfMeta({ ...pdfMeta, title: e.target.value })}
+                      placeholder="Document Title"
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Author
+                    </label>
+                    <input
+                      type="text"
+                      value={pdfMeta.author}
+                      onChange={(e) => setPdfMeta({ ...pdfMeta, author: e.target.value })}
+                      placeholder="Author Name"
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Subject
+                    </label>
+                    <input
+                      type="text"
+                      value={pdfMeta.subject}
+                      onChange={(e) => setPdfMeta({ ...pdfMeta, subject: e.target.value })}
+                      placeholder="Document Subject"
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Keywords (comma-separated)
+                    </label>
+                    <input
+                      type="text"
+                      value={pdfMeta.keywords}
+                      onChange={(e) => setPdfMeta({ ...pdfMeta, keywords: e.target.value })}
+                      placeholder="invoice, report, 2026"
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Creator Application
+                    </label>
+                    <input
+                      type="text"
+                      value={pdfMeta.creator}
+                      onChange={(e) => setPdfMeta({ ...pdfMeta, creator: e.target.value })}
+                      placeholder="Creator"
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Producer
+                    </label>
+                    <input
+                      type="text"
+                      value={pdfMeta.producer}
+                      onChange={(e) => setPdfMeta({ ...pdfMeta, producer: e.target.value })}
+                      placeholder="Producer"
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    />
+                  </div>
                 </div>
               </div>
             )}
@@ -1070,6 +1233,145 @@ Calculated at: ${new Date().toLocaleString()}
               </div>
             )}
 
+            {/* Crop Image settings */}
+            {tool.slug === "crop-image" && (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { id: "custom", label: "Custom" },
+                      { id: "1:1", label: "1:1 Square", ratio: 1 },
+                      { id: "16:9", label: "16:9", ratio: 16 / 9 },
+                      { id: "4:3", label: "4:3", ratio: 4 / 3 },
+                      { id: "3:2", label: "3:2", ratio: 3 / 2 },
+                    ].map((preset) => (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => {
+                          setCropPreset(preset.id);
+                          if (preset.ratio && imageNaturalSize) {
+                            const { width: nw, height: nh } = imageNaturalSize;
+                            let w = nw;
+                            let h = Math.round(nw / preset.ratio);
+                            if (h > nh) {
+                              h = nh;
+                              w = Math.round(nh * preset.ratio);
+                            }
+                            setCropX(Math.round((nw - w) / 2));
+                            setCropY(Math.round((nh - h) / 2));
+                            setCropWidth(w);
+                            setCropHeight(h);
+                          }
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                          cropPreset === preset.id
+                            ? "bg-brand-600 text-white"
+                            : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700"
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                  {imageNaturalSize && (
+                    <span className="text-xs text-slate-400 font-mono">
+                      Original: {imageNaturalSize.width} × {imageNaturalSize.height} px
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      X Offset (px)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={cropX}
+                      onChange={(e) => setCropX(e.target.value)}
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Y Offset (px)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={cropY}
+                      onChange={(e) => setCropY(e.target.value)}
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Width (px)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={cropWidth}
+                      onChange={(e) => setCropWidth(e.target.value)}
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Height (px)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={cropHeight}
+                      onChange={(e) => setCropHeight(e.target.value)}
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Rotate & Flip Image settings */}
+            {tool.slug === "rotate-image" && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Rotation Angle
+                  </label>
+                  <select
+                    value={rotationAngle}
+                    onChange={(e) => setRotationAngle(Number(e.target.value))}
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  >
+                    <option value={0}>0° (No Rotation)</option>
+                    <option value={90}>90° Clockwise</option>
+                    <option value={180}>180° Flip</option>
+                    <option value={270}>270° Counter-Clockwise</option>
+                  </select>
+                </div>
+                <label className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={imageFlipH}
+                    onChange={(e) => setImageFlipH(e.target.checked)}
+                    className="rounded text-brand-600 focus:ring-brand-500"
+                  />
+                  <span>Flip Horizontal (Mirror)</span>
+                </label>
+                <label className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={imageFlipV}
+                    onChange={(e) => setImageFlipV(e.target.checked)}
+                    className="rounded text-brand-600 focus:ring-brand-500"
+                  />
+                  <span>Flip Vertical</span>
+                </label>
+              </div>
+            )}
+
             {/* Image DPI calculator settings */}
             {tool.slug === "image-dpi-calculator" && (
               <div>
@@ -1133,6 +1435,71 @@ Calculated at: ${new Date().toLocaleString()}
                       onChange={(e) => setRenamePrefix(e.target.value)}
                       className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
                     />
+                  </div>
+                )}
+                {renameRule === "suffix" && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Suffix String
+                    </label>
+                    <input
+                      type="text"
+                      value={renameSuffix}
+                      onChange={(e) => setRenameSuffix(e.target.value)}
+                      placeholder="_final"
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+                )}
+                {renameRule === "numbering" && (
+                  <div className="sm:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Prefix
+                      </label>
+                      <input
+                        type="text"
+                        value={renamePrefix}
+                        onChange={(e) => setRenamePrefix(e.target.value)}
+                        className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Start Number
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={renameStartNum}
+                        onChange={(e) => setRenameStartNum(e.target.value)}
+                        className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Zero Padding
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="6"
+                        value={renamePadDigits}
+                        onChange={(e) => setRenamePadDigits(e.target.value)}
+                        className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Suffix
+                      </label>
+                      <input
+                        type="text"
+                        value={renameSuffix}
+                        onChange={(e) => setRenameSuffix(e.target.value)}
+                        className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      />
+                    </div>
                   </div>
                 )}
                 {renameRule === "replace" && (
@@ -1223,8 +1590,7 @@ Calculated at: ${new Date().toLocaleString()}
             {result.url && (
               <a
                 href={result.url}
-                download={result.filename || "output"}
-                onClick={() => triggerDownload(result.url, result.filename)}
+                download={sanitizeFilename(result.filename, "output")}
                 className="flex-1 min-w-[240px] flex items-center justify-center gap-2.5 py-4 px-6 rounded-2xl font-black text-white bg-brand-600 hover:bg-brand-500 shadow-lg shadow-brand-600/30 hover:scale-[1.01] active:scale-[0.99] transition-all text-base focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/30"
               >
                 <Download className="w-5 h-5" />
@@ -1272,8 +1638,7 @@ Calculated at: ${new Date().toLocaleString()}
                 {result.url && (
                   <a
                     href={result.url}
-                    download={result.filename || "image"}
-                    onClick={() => triggerDownload(result.url, result.filename)}
+                    download={sanitizeFilename(result.filename, "image")}
                     className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-sm transition-all"
                   >
                     <Download className="w-3.5 h-3.5" />
@@ -1313,8 +1678,7 @@ Calculated at: ${new Date().toLocaleString()}
               </div>
               <a
                 href={result.url}
-                download={result.filename}
-                onClick={() => triggerDownload(result.url, result.filename)}
+                download={sanitizeFilename(result.filename, "download")}
                 className="inline-flex items-center gap-2 py-4 px-6 rounded-xl font-extrabold text-white bg-brand-600 hover:bg-brand-500 shadow-md shadow-brand-600/20 hover:scale-[1.01] active:scale-[0.99] transition-all text-sm"
               >
                 <Download className="w-4 h-4" />
@@ -1354,8 +1718,7 @@ Calculated at: ${new Date().toLocaleString()}
               </div>
               <a
                 href={result.url}
-                download={result.filename}
-                onClick={() => triggerDownload(result.url, result.filename)}
+                download={sanitizeFilename(result.filename, "download")}
                 className="inline-flex items-center gap-2 py-4 px-6 rounded-xl font-extrabold text-white bg-brand-600 hover:bg-brand-500 shadow-md shadow-brand-600/20 hover:scale-[1.01] active:scale-[0.99] transition-all text-sm"
               >
                 <Download className="w-4 h-4" />
@@ -1378,8 +1741,7 @@ Calculated at: ${new Date().toLocaleString()}
                 </div>
                 <a
                   href={result.url}
-                  download={result.filename}
-                  onClick={() => triggerDownload(result.url, result.filename)}
+                  download={sanitizeFilename(result.filename, "archive.zip")}
                   className="inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-md transition-all text-sm shrink-0"
                 >
                   <Download className="w-4 h-4" />
@@ -1403,8 +1765,7 @@ Calculated at: ${new Date().toLocaleString()}
                     </div>
                     <a
                       href={item.url}
-                      download={item.filename}
-                      onClick={() => triggerDownload(item.url, item.filename)}
+                      download={sanitizeFilename(item.filename, "image")}
                       className="p-2 rounded-lg bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 hover:bg-brand-100 transition-colors shrink-0"
                       title={`Download ${item.filename}`}
                     >
@@ -1427,15 +1788,26 @@ Calculated at: ${new Date().toLocaleString()}
                     </h4>
                     <p className="text-xs text-slate-400 mt-0.5">{result.meta.name}</p>
                   </div>
-                  <a
-                    href={result.url}
-                    download={result.filename}
-                    onClick={() => triggerDownload(result.url, result.filename)}
-                    className="inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow transition-all text-xs shrink-0"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download Metadata (.json)</span>
-                  </a>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {result.cleanUrl && (
+                      <a
+                        href={result.cleanUrl}
+                        download={sanitizeFilename(result.cleanFilename, "clean_image")}
+                        className="inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow transition-all text-xs shrink-0"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Download Clean Image (No EXIF)</span>
+                      </a>
+                    )}
+                    <a
+                      href={result.url}
+                      download={sanitizeFilename(result.filename, "metadata.json")}
+                      className="inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all text-xs shrink-0"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download Metadata (.json)</span>
+                    </a>
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
                   <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
@@ -1463,6 +1835,25 @@ Calculated at: ${new Date().toLocaleString()}
                     <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">{result.meta.lastModified}</span>
                   </div>
                 </div>
+                {result.meta.exif ? (
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                    <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Detected EXIF Tags
+                    </h5>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+                      {Object.entries(result.meta.exif).map(([k, v]) => (
+                        <div key={k} className="p-3 bg-amber-50/70 dark:bg-amber-950/20 rounded-xl border border-amber-200/60 dark:border-amber-900/40">
+                          <span className="text-xs text-slate-400 block capitalize">{k.replace(/([A-Z])/g, " $1")}</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200 text-xs break-all">{String(v)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 pt-1">
+                    No embedded JPEG EXIF tags (camera/GPS) detected in this image.
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -1658,8 +2049,7 @@ Calculated at: ${new Date().toLocaleString()}
                           <div className="flex justify-end pt-2">
                             <a
                               href={result.url}
-                              download={result.filename}
-                              onClick={() => triggerDownload(result.url, result.filename)}
+                              download={sanitizeFilename(result.filename, "report.txt")}
                               className="inline-flex items-center gap-2 py-3 px-5 rounded-xl font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-sm transition-all text-xs"
                             >
                               <Download className="w-3.5 h-3.5" />

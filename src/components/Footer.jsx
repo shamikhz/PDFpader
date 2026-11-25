@@ -100,7 +100,7 @@ export default function Footer() {
               Terms of Service
             </Link>
             <span className="flex items-center gap-1 text-slate-400">
-              Powered by WebAssembly &amp; Web Workers <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              100% Client-Side JS &amp; Web Crypto <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             </span>
           </div>
         </div>

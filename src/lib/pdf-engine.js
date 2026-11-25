@@ -340,7 +340,13 @@ export async function updatePdfMetadata(file, metadata, onProgress = () => {}) {
   if (metadata.title !== undefined) doc.setTitle(metadata.title);
   if (metadata.author !== undefined) doc.setAuthor(metadata.author);
   if (metadata.subject !== undefined) doc.setSubject(metadata.subject);
-  if (metadata.keywords !== undefined) doc.setKeywords(metadata.keywords.split(",").map((s) => s.trim()));
+  if (metadata.keywords !== undefined) {
+    const kwList = metadata.keywords
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    doc.setKeywords(kwList);
+  }
   if (metadata.creator !== undefined) doc.setCreator(metadata.creator);
   if (metadata.producer !== undefined) doc.setProducer(metadata.producer);
 
@@ -351,13 +357,14 @@ export async function updatePdfMetadata(file, metadata, onProgress = () => {}) {
 }
 
 /**
- * Resizes pages of a PDF to standard A4, Letter, or Legal.
+ * Resizes pages of a PDF to standard A4, Letter, or Legal, scaling and centering content to fit.
  */
 export async function convertPdfPageSize(file, targetSizeName = "A4", onProgress = () => {}) {
   const fileBytes = await file.arrayBuffer();
-  const doc = await PDFDocument.load(fileBytes);
-  const pages = doc.getPages();
-  const total = pages.length;
+  const srcDoc = await PDFDocument.load(fileBytes);
+  const outDoc = await PDFDocument.create();
+  const srcPages = srcDoc.getPages();
+  const total = srcPages.length;
 
   let targetDims = PageSizes.A4;
   if (targetSizeName === "Letter") targetDims = PageSizes.Letter;
@@ -366,16 +373,57 @@ export async function convertPdfPageSize(file, targetSizeName = "A4", onProgress
   const [targetWidth, targetHeight] = targetDims;
 
   for (let i = 0; i < total; i++) {
-    const page = pages[i];
-    page.setSize(targetWidth, targetHeight);
+    const srcPage = srcPages[i];
+    const { width: origW, height: origH } = srcPage.getSize();
+    const newPage = outDoc.addPage([targetWidth, targetHeight]);
+
+    // pdf-lib's embedPage throws MissingPageContentsEmbeddingError on completely blank pages
+    if (srcPage.node.Contents()) {
+      const embeddedPage = await outDoc.embedPage(srcPage);
+      const scale = Math.min(targetWidth / origW, targetHeight / origH);
+      const drawW = origW * scale;
+      const drawH = origH * scale;
+      const x = (targetWidth - drawW) / 2;
+      const y = (targetHeight - drawH) / 2;
+      newPage.drawPage(embeddedPage, { x, y, width: drawW, height: drawH });
+    }
+
     onProgress(Math.round(((i + 1) / total) * 100));
   }
 
-  return await doc.save();
+  return await outDoc.save();
 }
 
 /**
- * Converts multiple image files (JPG or PNG) into a single PDF.
+ * Rasterizes a non-JPG/PNG image (e.g. WebP) to PNG bytes in the browser via Canvas.
+ */
+async function rasterizeImageToPngBytes(imgFile) {
+  const url = URL.createObjectURL(imgFile);
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error(`Failed to decode image: ${imgFile.name}`));
+      el.src = url;
+    });
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Canvas PNG export failed"))), "image/png");
+    });
+    canvas.width = 0;
+    canvas.height = 0;
+    return await blob.arrayBuffer();
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+/**
+ * Converts multiple image files (JPG, PNG, or WebP) into a single PDF.
  */
 export async function imagesToPdf(imageFiles, onProgress = () => {}) {
   const pdfDoc = await PDFDocument.create();
@@ -384,13 +432,20 @@ export async function imagesToPdf(imageFiles, onProgress = () => {}) {
   for (let i = 0; i < total; i++) {
     await new Promise((r) => setTimeout(r, 0));
     const imgFile = imageFiles[i];
-    const imgBytes = await imgFile.arrayBuffer();
-    let embeddedImg;
+    const lowerName = imgFile.name.toLowerCase();
+    const isJpg = imgFile.type === "image/jpeg" || lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg");
+    const isPng = imgFile.type === "image/png" || lowerName.endsWith(".png");
 
-    if (imgFile.type === "image/jpeg" || imgFile.name.toLowerCase().endsWith(".jpg") || imgFile.name.toLowerCase().endsWith(".jpeg")) {
+    let embeddedImg;
+    if (isJpg) {
+      const imgBytes = await imgFile.arrayBuffer();
       embeddedImg = await pdfDoc.embedJpg(imgBytes);
-    } else {
+    } else if (isPng) {
+      const imgBytes = await imgFile.arrayBuffer();
       embeddedImg = await pdfDoc.embedPng(imgBytes);
+    } else {
+      const pngBytes = await rasterizeImageToPngBytes(imgFile);
+      embeddedImg = await pdfDoc.embedPng(pngBytes);
     }
 
     const { width, height } = embeddedImg;
