@@ -223,6 +223,15 @@ export default function Navbar() {
                 </div>
               )}
             </div>
+
+            {/* Blog Link */}
+            <Link
+              href="/blog"
+              onClick={() => setActiveDropdown(null)}
+              className="px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+            >
+              Blog
+            </Link>
           </nav>
 
           {/* Right Action Bar */}
@@ -293,6 +302,16 @@ export default function Navbar() {
                   </Link>
                 ))}
               </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+              <Link
+                href="/blog"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block p-2.5 rounded-lg text-sm font-semibold text-brand-600 dark:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                Blog &amp; Guides
+              </Link>
             </div>
           </div>
         )}

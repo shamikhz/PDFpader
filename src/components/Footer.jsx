@@ -93,6 +93,9 @@ export default function Footer() {
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>© {new Date().getFullYear()} PDFpadar. Built with privacy and speed in mind.</p>
           <div className="flex items-center gap-6">
+            <Link href="/blog" className="hover:text-slate-300 transition-colors">
+              Blog
+            </Link>
             <Link href="/privacy" className="hover:text-slate-300 transition-colors">
               Privacy Policy
             </Link>

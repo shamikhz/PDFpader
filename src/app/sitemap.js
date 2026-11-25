@@ -1,4 +1,5 @@
 import { TOOLS } from "@/lib/tools-registry";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 
 const BASE_URL = "https://pdfpadar.com";
 
@@ -25,12 +26,25 @@ export default function sitemap() {
     priority: HIGH_PRIORITY_SLUGS.includes(tool.slug) ? 0.9 : 0.7,
   }));
 
+  const blogUrls = BLOG_POSTS.map((post) => ({
+    url: `${BASE_URL}/blog/${post.slug}`,
+    lastModified: new Date(post.publishedAt),
+    changeFrequency: "monthly",
+    priority: 0.75,
+  }));
+
   return [
     {
       url: BASE_URL,
       lastModified: now,
       changeFrequency: "daily",
       priority: 1.0,
+    },
+    {
+      url: `${BASE_URL}/blog`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.85,
     },
     {
       url: `${BASE_URL}/privacy`,
@@ -45,5 +59,6 @@ export default function sitemap() {
       priority: 0.4,
     },
     ...toolUrls,
+    ...blogUrls,
   ];
 }
