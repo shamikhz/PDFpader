@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { FileCheck2, ShieldCheck, Heart, Sparkles, Lock } from "lucide-react";
 import { getToolsByCategory } from "@/lib/tools-registry";
+import InstallAppButton from "./InstallAppButton";
 
 export default function Footer() {
   const pdfTools = getToolsByCategory("pdf").slice(0, 6);
@@ -28,6 +29,9 @@ export default function Footer() {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brand-950/60 border border-brand-800/80 text-xs text-brand-200 font-medium">
               <Lock className="w-4 h-4 text-brand-400 shrink-0" />
               <span>Zero server storage • Files never leave your device</span>
+            </div>
+            <div>
+              <InstallAppButton />
             </div>
           </div>
 
